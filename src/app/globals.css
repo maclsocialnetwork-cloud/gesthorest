@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #2D3748;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-poppins), sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .container-gesthorest {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded bg-gesthorest-accent px-6 py-3 font-semibold text-white transition-colors hover:bg-gesthorest-accent-hover;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded border-2 border-gesthorest-primary px-6 py-3 font-semibold text-gesthorest-primary transition-colors hover:bg-gesthorest-primary hover:text-white;
+  }
+
+  .section-padding {
+    @apply py-16 sm:py-20 lg:py-24;
+  }
+}
