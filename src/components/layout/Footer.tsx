@@ -31,8 +31,10 @@ const FORMATIONS_LINKS = [
   { href: "/catalogue?domaine=management", label: "Management" },
   { href: "/catalogue?domaine=ressources-humaines", label: "Ressources Humaines" },
   { href: "/catalogue?domaine=finance-comptabilite", label: "Finance & Comptabilité" },
-  { href: "/catalogue?domaine=bureautique-digital", label: "Bureautique & Digital" },
   { href: "/catalogue", label: "Voir tout le catalogue" },
+  { href: "/fdfp", label: "Financement FDFP" },
+  { href: "/telechargements", label: "Téléchargements" },
+  { href: "/faq", label: "FAQ" },
 ];
 
 export default function Footer() {
