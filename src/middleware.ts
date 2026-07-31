@@ -1,52 +1,79 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-
-function createSupabaseMiddleware(request: NextRequest, response: NextResponse) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
-}
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  const publicPaths = ["/espace-apprenant/connexion", "/espace-apprenant/inscription"];
-  if (publicPaths.includes(pathname)) {
-    const response = NextResponse.next();
-    const supabase = createSupabaseMiddleware(request, response);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      return NextResponse.redirect(new URL("/espace-apprenant/dashboard", request.url));
+  // Mode dégradé : si clés non configurées, rediriger vers login sans planter
+  if (
+    !supabaseUrl ||
+    supabaseUrl.includes('REMPLACER') ||
+    !supabaseKey ||
+    supabaseKey.includes('REMPLACER')
+  ) {
+    if (
+      request.nextUrl.pathname.startsWith('/admin') &&
+      !request.nextUrl.pathname.includes('/admin/login')
+    ) {
+      return NextResponse.redirect(new URL('/admin/login', request.url))
     }
-    return response;
+    if (
+      request.nextUrl.pathname.startsWith('/espace-apprenant') &&
+      !request.nextUrl.pathname.includes('/connexion') &&
+      !request.nextUrl.pathname.includes('/inscription')
+    ) {
+      return NextResponse.redirect(new URL('/espace-apprenant/connexion', request.url))
+    }
+    return NextResponse.next()
   }
 
-  const response = NextResponse.next();
-  const supabase = createSupabaseMiddleware(request, response);
-  const { data: { user } } = await supabase.auth.getUser();
+  // Logique auth normale avec Supabase
+  try {
+    const { createServerClient } = await import('@supabase/ssr')
+    const response = NextResponse.next({ request: { headers: request.headers } })
 
-  if (!user) {
-    const loginUrl = new URL("/espace-apprenant/connexion", request.url);
-    return NextResponse.redirect(loginUrl);
+    const supabase = createServerClient(supabaseUrl, supabaseKey, {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: Record<string, unknown>) {
+          response.cookies.set({ name, value, ...options })
+        },
+        remove(name: string, options: Record<string, unknown>) {
+          response.cookies.set({ name, value: '', ...options })
+        },
+      },
+    })
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session) {
+      if (
+        request.nextUrl.pathname.startsWith('/admin') &&
+        !request.nextUrl.pathname.includes('/admin/login')
+      ) {
+        return NextResponse.redirect(new URL('/admin/login', request.url))
+      }
+      if (
+        request.nextUrl.pathname.startsWith('/espace-apprenant') &&
+        !request.nextUrl.pathname.includes('/connexion') &&
+        !request.nextUrl.pathname.includes('/inscription')
+      ) {
+        return NextResponse.redirect(new URL('/espace-apprenant/connexion', request.url))
+      }
+    }
+
+    return response
+  } catch (e) {
+    console.error('Middleware error:', e)
+    return NextResponse.next()
   }
-
-  return response;
 }
 
 export const config = {
-  matcher: ["/espace-apprenant/:path*", "/admin/:path*"],
-};
+  matcher: ['/admin/:path*', '/espace-apprenant/:path*'],
+}
