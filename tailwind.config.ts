@@ -18,6 +18,7 @@ const config: Config = {
           light: "#F8F9FC",
           text: "#2D3748",
           "text-light": "#6B7280",
+          muted: "#9CA3AF",
         },
       },
       fontFamily: {
