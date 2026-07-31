@@ -32,6 +32,16 @@ h1, h2, h3, h4, h5, h6 {
   100% { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -47,6 +57,14 @@ h1, h2, h3, h4, h5, h6 {
 
   .animate-slide-in-up {
     animation: slideInUp 0.4s ease-out forwards;
+  }
+
+  .animate-accordion-down {
+    animation: accordion-down 200ms ease-out;
+  }
+
+  .animate-accordion-up {
+    animation: accordion-up 200ms ease-out;
   }
 
   .container-gesthorest {

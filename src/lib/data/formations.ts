@@ -26,10 +26,12 @@ type FormationRow = {
   description: string | null;
   programme: { titre: string; points: string[] }[] | null;
   objectifs: string[] | null;
+  competences_acquises: string[] | null;
   public_cible: string | null;
   prerequis: string | null;
   prix: number | null;
   devise: string | null;
+  financement_fdfp: boolean | null;
   gesthorest_sessions?: {
     id: string;
     date_debut: string;
@@ -53,8 +55,10 @@ function mapRow(row: FormationRow): Formation {
     description: row.description ?? "",
     programme: row.programme ?? [],
     objectifs: row.objectifs ?? [],
+    competencesAcquises: row.competences_acquises ?? [],
     publicCible: row.public_cible ?? "",
     prerequis: row.prerequis ?? "",
+    financementFdfp: row.financement_fdfp ?? false,
     prix: row.prix,
     devise: row.devise ?? "FCFA",
     formateur: row.gesthorest_formateur ?? { nom: "Formateur Gesthorest", titre: "Consultant" },

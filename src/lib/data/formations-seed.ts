@@ -52,10 +52,12 @@ export type Formation = {
   description: string;
   programme: { titre: string; points: string[] }[];
   objectifs: string[];
+  competencesAcquises: string[];
   publicCible: string;
   prerequis: string;
   prix: number | null;
   devise: string;
+  financementFdfp: boolean;
   formateur: { nom: string; titre: string };
   sessions: Session[];
 };
@@ -69,6 +71,7 @@ export const SEED_FORMATIONS: Formation[] = [
     format: "Présentiel",
     dureeJours: 3,
     dureeLabel: "3 jours",
+    financementFdfp: true,
     description:
       "Cette formation outille les managers pour piloter leur équipe avec assurance : fixer des objectifs clairs, déléguer efficacement, motiver au quotidien et gérer les situations difficiles. Un programme concret, riche en mises en situation et retours d'expérience.",
     programme: [
@@ -99,6 +102,13 @@ export const SEED_FORMATIONS: Formation[] = [
       "Fixer des objectifs clairs et mesurables",
       "Déléguer efficacement en conservant la maîtrise des résultats",
       "Gérer les situations de tension au sein de l'équipe",
+    ],
+    competencesAcquises: [
+      "Maîtrise des styles de management situationnel",
+      "Capacité à fixer et suivre des objectifs SMART",
+      "Techniques de délégation et de motivation",
+      "Gestion des conflits et situations difficiles",
+      "Animation de réunions de pilotage efficaces",
     ],
     publicCible:
       "Managers, chefs d'équipe, responsables de service souhaitant renforcer leurs pratiques managériales.",
@@ -133,6 +143,7 @@ export const SEED_FORMATIONS: Formation[] = [
     format: "Blended",
     dureeJours: 4,
     dureeLabel: "4 jours",
+    financementFdfp: true,
     description:
       "Maîtrisez l'ensemble du processus de recrutement, du sourcing à l'intégration, ainsi que les fondamentaux de la gestion des talents pour fidéliser vos meilleurs collaborateurs.",
     programme: [
@@ -155,6 +166,13 @@ export const SEED_FORMATIONS: Formation[] = [
       "Structurer un processus de recrutement fiable",
       "Conduire des entretiens efficaces et non-discriminants",
       "Mettre en place une stratégie de gestion des talents",
+    ],
+    competencesAcquises: [
+      "Rédaction de fiches de poste et d'annonces efficaces",
+      "Conduite d'entretiens structurés",
+      "Évaluation et sélection des candidats",
+      "Intégration et fidélisation des collaborateurs",
+      "Cartographie des talents internes",
     ],
     publicCible: "DRH, responsables RH, chargés de recrutement.",
     prerequis: "Aucun prérequis spécifique.",
@@ -188,6 +206,7 @@ export const SEED_FORMATIONS: Formation[] = [
     format: "Présentiel",
     dureeJours: 2,
     dureeLabel: "2 jours",
+    financementFdfp: true,
     description:
       "Une formation pratique pour comprendre les états financiers, piloter un budget et dialoguer efficacement avec la direction financière, sans connaissances comptables préalables.",
     programme: [
@@ -204,6 +223,12 @@ export const SEED_FORMATIONS: Formation[] = [
       "Lire et interpréter les documents financiers de l'entreprise",
       "Participer activement à la construction budgétaire",
       "Dialoguer efficacement avec la fonction finance",
+    ],
+    competencesAcquises: [
+      "Lecture et interprétation d'un bilan et compte de résultat",
+      "Construction d'un budget opérationnel",
+      "Analyse des écarts budgétaires",
+      "Communication avec la direction financière",
     ],
     publicCible: "Managers opérationnels, chefs de projet, non-financiers.",
     prerequis: "Aucun prérequis.",
@@ -237,6 +262,7 @@ export const SEED_FORMATIONS: Formation[] = [
     format: "Distanciel",
     dureeJours: 2,
     dureeLabel: "2 jours",
+    financementFdfp: false,
     description:
       "Passez à la vitesse supérieure sur Excel : tableaux croisés dynamiques, fonctions avancées et création de tableaux de bord automatisés pour vos reportings.",
     programme: [
@@ -253,6 +279,12 @@ export const SEED_FORMATIONS: Formation[] = [
       "Maîtriser les fonctions avancées d'Excel",
       "Construire des tableaux de bord dynamiques",
       "Automatiser des rapports récurrents",
+    ],
+    competencesAcquises: [
+      "Maîtrise des fonctions RECHERCHEX, INDEX/EQUIV",
+      "Création de tableaux croisés dynamiques",
+      "Conception de tableaux de bord automatisés",
+      "Automatisation des rapports récurrents",
     ],
     publicCible: "Toute personne utilisant Excel au quotidien souhaitant se perfectionner.",
     prerequis: "Bonne maîtrise des fonctions de base d'Excel.",
@@ -278,6 +310,7 @@ export const SEED_FORMATIONS: Formation[] = [
     format: "Présentiel",
     dureeJours: 3,
     dureeLabel: "3 jours",
+    financementFdfp: true,
     description:
       "Développez votre posture de leader et acquérez les outils pour conduire le changement au sein de votre organisation avec impact et adhésion des équipes.",
     programme: [
@@ -294,6 +327,13 @@ export const SEED_FORMATIONS: Formation[] = [
       "Renforcer sa posture de leader",
       "Diagnostiquer et lever les résistances au changement",
       "Construire un plan de conduite du changement efficace",
+    ],
+    competencesAcquises: [
+      "Posture et leadership situationnel",
+      "Diagnostic des résistances au changement",
+      "Construction d'une vision partagée",
+      "Plan de communication du changement",
+      "Accompagnement des équipes en transition",
     ],
     publicCible: "Cadres dirigeants, managers, chefs de projet transformation.",
     prerequis: "Expérience d'encadrement recommandée.",
@@ -319,6 +359,7 @@ export const SEED_FORMATIONS: Formation[] = [
     format: "Blended",
     dureeJours: 5,
     dureeLabel: "1 semaine",
+    financementFdfp: true,
     description:
       "Comprenez les exigences de la norme ISO 9001:2015 et acquérez les compétences nécessaires pour déployer ou maintenir un système de management de la qualité efficace.",
     programme: [
@@ -335,6 +376,13 @@ export const SEED_FORMATIONS: Formation[] = [
       "Comprendre les exigences de la norme ISO 9001:2015",
       "Déployer un système de management de la qualité",
       "Préparer son organisation à un audit de certification",
+    ],
+    competencesAcquises: [
+      "Compréhension de la structure ISO 9001:2015",
+      "Approche processus et cartographie des processus",
+      "Gestion des risques et opportunités",
+      "Déploiement d'un SMQ",
+      "Préparation et conduite d'un audit interne",
     ],
     publicCible: "Responsables qualité, auditeurs internes, chefs de projet certification.",
     prerequis: "Connaissance de base des processus d'entreprise.",
