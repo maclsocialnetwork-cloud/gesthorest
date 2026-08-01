@@ -1,41 +1,47 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import AdminShell from "@/components/admin/AdminShell";
+import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
+import AdminShell from '@/components/admin/AdminShell'
 
 export const metadata = {
-  title: "Administration",
-};
+  title: 'Administration',
+}
 
 export default async function AdminLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const cookieStore = cookies()
+  const hasAdminCookie = cookieStore.get('gesthorest_admin_session')?.value === '1'
 
-  if (!user) {
-    // Le middleware gère la redirection vers /admin/login pour toutes les routes protégées.
-    // Ici on rend les enfants directement pour éviter une boucle infinie
-    // quand le layout enveloppe /admin/login lui-même.
-    return <>{children}</>
+  // Tentative d'auth Supabase
+  let displayName = 'Administrateur'
+  try {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user) {
+      const { data: apprenant } = await supabase
+        .from('apprenants')
+        .select('nom, prenom, role')
+        .eq('user_id', user.id)
+        .single()
+
+      if (apprenant && apprenant.role === 'admin') {
+        displayName = `${apprenant.prenom} ${apprenant.nom}`
+        return <AdminShell displayName={displayName}>{children}</AdminShell>
+      }
+    }
+  } catch {
+    // Supabase non configuré ou erreur → on continue avec le cookie
   }
 
-  const { data: apprenant } = await supabase
-    .from("apprenants")
-    .select("nom, prenom, role")
-    .eq("user_id", user.id)
-    .single();
-
-  if (!apprenant || apprenant.role !== "admin") {
-    redirect("/espace-apprenant/dashboard");
+  // Cookie de session admin local
+  if (hasAdminCookie) {
+    return <AdminShell displayName={displayName}>{children}</AdminShell>
   }
 
-  const displayName = `${apprenant.prenom} ${apprenant.nom}`;
-
-  return (
-    <AdminShell displayName={displayName}>
-      {children}
-    </AdminShell>
-  );
+  // Pas de session valide → laisser passer (le middleware gère la redirection,
+  // ici on est sur /admin/login ou une route qui a contourné le middleware)
+  return <>{children}</>
 }

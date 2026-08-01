@@ -49,10 +49,15 @@ export default function AdminShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   async function handleLogout() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/espace-apprenant/connexion");
-    router.refresh();
+    // Effacer le cookie de session admin local
+    await fetch('/api/admin/auth/logout', { method: 'POST' })
+    // Déconnecter aussi la session Supabase si elle existe
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+    } catch { /* ignoré si Supabase non configuré */ }
+    router.push('/admin/login')
+    router.refresh()
   }
 
   function isActive(href: string) {

@@ -17,10 +17,10 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [defaultPwd, setDefaultPwd] = useState('')
+  const [hint, setHint] = useState('')
 
   useEffect(() => {
-    setDefaultPwd(getDynamicPassword())
+    setHint(getDynamicPassword())
   }, [])
 
   async function handleSubmit(e: FormEvent) {
@@ -28,6 +28,31 @@ export default function AdminLoginPage() {
     setError('')
     setLoading(true)
 
+    // 1. Vérification locale via API (cookie httpOnly) — prioritaire
+    if (email.trim().toLowerCase() === 'admin@gesthorest.com') {
+      try {
+        const res = await fetch('/api/admin/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+        })
+        if (res.ok) {
+          router.push('/admin')
+          return
+        }
+        const data = await res.json()
+        // Si 401 : mot de passe incorrect pour le compte admin local
+        if (res.status === 401) {
+          setError(data.error ?? 'Mot de passe incorrect.')
+          setLoading(false)
+          return
+        }
+      } catch {
+        // réseau cassé → tenter Supabase en fallback
+      }
+    }
+
+    // 2. Fallback Supabase (comptes autres qu'admin@gesthorest.com)
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     const supabaseReady =
@@ -47,23 +72,16 @@ export default function AdminLoginPage() {
           return
         }
         router.push('/admin')
+        return
       } catch {
         setError('Erreur de connexion. Veuillez réessayer.')
         setLoading(false)
-      }
-    } else {
-      // Mode local — validation mot de passe dynamique
-      const currentPwd = getDynamicPassword()
-      if (password === currentPwd) {
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('gesthorest_admin_auth', '1')
-        }
-        router.push('/admin')
-      } else {
-        setError('Mot de passe incorrect.')
-        setLoading(false)
+        return
       }
     }
+
+    setError('Identifiants incorrects.')
+    setLoading(false)
   }
 
   return (
@@ -139,11 +157,10 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          {/* Note discrète mot de passe par défaut */}
-          {defaultPwd && (
+          {hint && (
             <p className="mt-6 text-center text-xs text-gray-300">
-              Mot de passe par défaut : Année-Jour-Mois@GESTHOREST
-              {' '}(ex&nbsp;: {defaultPwd})
+              Mot de passe par défaut&nbsp;: Année-Jour-Mois@GESTHOREST
+              {' '}(ex&nbsp;: {hint})
             </p>
           )}
         </div>

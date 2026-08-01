@@ -1,41 +1,46 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const ADMIN_COOKIE = 'gesthorest_admin_session'
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Pages publiques de l'espace admin : laisser passer sans auth check
+  // /admin/login est une page publique — toujours laisser passer
   if (pathname === '/admin/login') {
     return NextResponse.next()
   }
 
+  // Cookie de session admin local (posé par /api/admin/auth/login)
+  const hasAdminCookie = request.cookies.get(ADMIN_COOKIE)?.value === '1'
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // Mode dégradé : si clés non configurées, rediriger vers login sans planter
+  // Mode dégradé : clés Supabase absentes ou placeholder
   if (
     !supabaseUrl ||
     supabaseUrl.includes('REMPLACER') ||
     !supabaseKey ||
     supabaseKey.includes('REMPLACER')
   ) {
-    if (
-      request.nextUrl.pathname.startsWith('/admin') &&
-      !request.nextUrl.pathname.includes('/admin/login')
-    ) {
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+    if (pathname.startsWith('/admin')) {
+      if (!hasAdminCookie) {
+        return NextResponse.redirect(new URL('/admin/login', request.url))
+      }
+      return NextResponse.next()
     }
     if (
-      request.nextUrl.pathname.startsWith('/espace-apprenant') &&
-      !request.nextUrl.pathname.includes('/connexion') &&
-      !request.nextUrl.pathname.includes('/inscription')
+      pathname.startsWith('/espace-apprenant') &&
+      !pathname.includes('/connexion') &&
+      !pathname.includes('/inscription')
     ) {
       return NextResponse.redirect(new URL('/espace-apprenant/connexion', request.url))
     }
     return NextResponse.next()
   }
 
-  // Logique auth normale avec Supabase
+  // Mode normal avec Supabase
   try {
     const { createServerClient } = await import('@supabase/ssr')
     const response = NextResponse.next({ request: { headers: request.headers } })
@@ -54,22 +59,23 @@ export async function middleware(request: NextRequest) {
       },
     })
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+    const { data: { session } } = await supabase.auth.getSession()
 
-    if (!session) {
-      if (
-        request.nextUrl.pathname.startsWith('/admin') &&
-        !request.nextUrl.pathname.includes('/admin/login')
-      ) {
+    // Admin : cookie local OU session Supabase suffisent
+    if (pathname.startsWith('/admin')) {
+      if (!session && !hasAdminCookie) {
         return NextResponse.redirect(new URL('/admin/login', request.url))
       }
-      if (
-        request.nextUrl.pathname.startsWith('/espace-apprenant') &&
-        !request.nextUrl.pathname.includes('/connexion') &&
-        !request.nextUrl.pathname.includes('/inscription')
-      ) {
+      return response
+    }
+
+    // Espace apprenant : session Supabase uniquement
+    if (
+      pathname.startsWith('/espace-apprenant') &&
+      !pathname.includes('/connexion') &&
+      !pathname.includes('/inscription')
+    ) {
+      if (!session) {
         return NextResponse.redirect(new URL('/espace-apprenant/connexion', request.url))
       }
     }
