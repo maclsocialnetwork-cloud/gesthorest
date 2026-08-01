@@ -105,7 +105,7 @@ export default function Footer() {
               </a>
             </li>
             <li>
-              <Link href="/admin/login" className="text-sm text-gesthorest-primary hover:text-gray-300 transition-colors duration-300">
+              <Link href="/admin/login" className="text-sm text-transparent hover:text-gray-300 transition-colors duration-300">
                 Administration
               </Link>
             </li>
