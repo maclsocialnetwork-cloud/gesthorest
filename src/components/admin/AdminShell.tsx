@@ -15,6 +15,8 @@ import {
   Menu,
   X,
   ChevronLeft,
+  Download,
+  Star,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -26,6 +28,13 @@ const ADMIN_NAV = [
   { id: "contenus", label: "Contenus", icon: FileText, href: "/admin/contenus" },
   { id: "candidatures", label: "Candidatures", icon: Briefcase, href: "/admin/candidatures" },
   { id: "parametres", label: "Paramètres", icon: Settings, href: "/admin/parametres" },
+];
+
+const CONTENU_NAV = [
+  { id: "accueil", label: "Accueil", icon: Star, href: "/admin/contenu/accueil" },
+  { id: "equipe", label: "Équipe", icon: Users, href: "/admin/contenu/equipe" },
+  { id: "telechargements", label: "Téléchargements", icon: Download, href: "/admin/contenu/telechargements" },
+  { id: "fdfp-demandes", label: "Demandes FDFP", icon: FileText, href: "/admin/contenu/fdfp" },
 ];
 
 export default function AdminShell({
@@ -63,7 +72,7 @@ export default function AdminShell({
           <span className="mx-2 text-white/30">|</span>
           <span className="text-sm font-semibold text-white">Administration</span>
         </div>
-        <nav className="flex flex-col gap-0.5 p-3">
+        <nav className="flex flex-col gap-0.5 overflow-y-auto p-3">
           {ADMIN_NAV.map((item) => (
             <Link
               key={item.id}
@@ -75,6 +84,21 @@ export default function AdminShell({
               }`}
             >
               <item.icon size={18} />
+              {item.label}
+            </Link>
+          ))}
+          <p className="mt-3 px-3 text-xs font-semibold uppercase tracking-wider text-white/30">Éditeur contenu</p>
+          {CONTENU_NAV.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={`flex items-center gap-3 rounded px-3 py-2 text-sm font-medium transition-colors ${
+                isActive(item.href)
+                  ? "bg-white/15 text-white"
+                  : "text-white/60 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <item.icon size={16} />
               {item.label}
             </Link>
           ))}

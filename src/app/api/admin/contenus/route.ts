@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   const table = body._table as string;
   delete body._table;
 
-  if (!["articles", "evenements", "temoignages", "equipe"].includes(table)) {
+  if (!["articles", "evenements", "temoignages", "equipe", "telechargements", "fdfp_demandes"].includes(table)) {
     return NextResponse.json({ error: "Table invalide" }, { status: 400 });
   }
 
@@ -40,7 +40,7 @@ export async function PUT(request: Request) {
   delete body._table;
   delete body._id;
 
-  if (!["articles", "evenements", "temoignages", "equipe"].includes(table)) {
+  if (!["articles", "evenements", "temoignages", "equipe", "telechargements", "fdfp_demandes"].includes(table)) {
     return NextResponse.json({ error: "Table invalide" }, { status: 400 });
   }
 
