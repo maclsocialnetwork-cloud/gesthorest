@@ -104,8 +104,8 @@ export default function Footer() {
                 +33 6 71 97 11 59
               </a>
             </li>
-            <li className="opacity-0 hover:opacity-100 transition-opacity duration-300">
-              <Link href="/admin/login" className="text-sm text-white/40">
+            <li>
+              <Link href="/admin/login" className="text-sm text-gesthorest-primary hover:text-gray-300 transition-colors duration-300">
                 Administration
               </Link>
             </li>

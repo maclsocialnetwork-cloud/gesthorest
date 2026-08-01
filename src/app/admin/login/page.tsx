@@ -1,15 +1,7 @@
 'use client'
 
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-
-function getDynamicPassword(): string {
-  const now = new Date()
-  const year = now.getFullYear()
-  const day = String(now.getDate()).padStart(2, '0')
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  return `${year}-${day}-${month}@GESTHOREST`
-}
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -17,12 +9,6 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [hint, setHint] = useState('')
-
-  useEffect(() => {
-    setHint(getDynamicPassword())
-  }, [])
-
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError('')
@@ -157,12 +143,6 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          {hint && (
-            <p className="mt-6 text-center text-xs text-gray-300">
-              Mot de passe par défaut&nbsp;: Année-Jour-Mois@GESTHOREST
-              {' '}(ex&nbsp;: {hint})
-            </p>
-          )}
         </div>
 
         <p className="text-center text-xs text-gray-300 mt-6">
