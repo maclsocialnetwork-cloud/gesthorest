@@ -34,6 +34,7 @@ export default function InscriptionPage() {
         email: data.email,
         password: data.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/espace-apprenant/connexion`,
           data: {
             nom: data.nom,
             prenom: data.prenom,
