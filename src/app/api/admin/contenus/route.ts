@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   const table = body._table as string;
   delete body._table;
 
-  if (!["articles", "evenements", "temoignages", "equipe", "telechargements", "fdfp_demandes"].includes(table)) {
+  if (!["articles", "evenements", "temoignages", "equipe", "telechargements", "fdfp_demandes", "sessions"].includes(table)) {
     return NextResponse.json({ error: "Table invalide" }, { status: 400 });
   }
 
@@ -40,7 +40,7 @@ export async function PUT(request: Request) {
   delete body._table;
   delete body._id;
 
-  if (!["articles", "evenements", "temoignages", "equipe", "telechargements", "fdfp_demandes"].includes(table)) {
+  if (!["articles", "evenements", "temoignages", "equipe", "telechargements", "fdfp_demandes", "sessions"].includes(table)) {
     return NextResponse.json({ error: "Table invalide" }, { status: 400 });
   }
 
@@ -57,7 +57,7 @@ export async function DELETE(request: Request) {
   const table = searchParams.get("table");
   const id = searchParams.get("id");
 
-  if (!table || !id || !["articles", "evenements", "temoignages", "equipe"].includes(table)) {
+  if (!table || !id || !["articles", "evenements", "temoignages", "equipe", "telechargements", "fdfp_demandes", "sessions"].includes(table)) {
     return NextResponse.json({ error: "Paramètres invalides" }, { status: 400 });
   }
 

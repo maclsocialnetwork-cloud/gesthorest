@@ -5,36 +5,39 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard,
+  Home,
+  Info,
   GraduationCap,
+  CalendarDays,
+  CalendarRange,
+  Newspaper,
+  Download,
   ClipboardList,
   Users,
-  FileText,
   Briefcase,
+  Phone,
   Settings,
   LogOut,
   Menu,
   X,
   ChevronLeft,
-  Download,
-  Star,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const ADMIN_NAV = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/admin" },
-  { id: "formations", label: "Formations", icon: GraduationCap, href: "/admin/formations" },
+  { id: "dashboard", label: "Dashboard KPI", icon: LayoutDashboard, href: "/admin" },
+  { id: "accueil", label: "Accueil", icon: Home, href: "/admin/contenu/accueil" },
+  { id: "a-propos", label: "À propos", icon: Info, href: "/admin/contenu/a-propos" },
+  { id: "catalogue", label: "Catalogue", icon: GraduationCap, href: "/admin/formations" },
+  { id: "sessions", label: "Sessions", icon: CalendarDays, href: "/admin/sessions" },
+  { id: "evenements", label: "Événements", icon: CalendarRange, href: "/admin/contenu/evenements" },
+  { id: "articles", label: "Actualités", icon: Newspaper, href: "/admin/contenu/articles" },
+  { id: "telechargements", label: "Téléchargements", icon: Download, href: "/admin/contenu/telechargements" },
   { id: "inscriptions", label: "Inscriptions", icon: ClipboardList, href: "/admin/inscriptions" },
   { id: "utilisateurs", label: "Utilisateurs", icon: Users, href: "/admin/utilisateurs" },
-  { id: "contenus", label: "Contenus", icon: FileText, href: "/admin/contenus" },
-  { id: "candidatures", label: "Candidatures", icon: Briefcase, href: "/admin/candidatures" },
+  { id: "candidatures", label: "Candidatures RH", icon: Briefcase, href: "/admin/candidatures" },
+  { id: "contact", label: "Contact", icon: Phone, href: "/admin/contenu/contact" },
   { id: "parametres", label: "Paramètres", icon: Settings, href: "/admin/parametres" },
-];
-
-const CONTENU_NAV = [
-  { id: "accueil", label: "Accueil", icon: Star, href: "/admin/contenu/accueil" },
-  { id: "equipe", label: "Équipe", icon: Users, href: "/admin/contenu/equipe" },
-  { id: "telechargements", label: "Téléchargements", icon: Download, href: "/admin/contenu/telechargements" },
-  { id: "fdfp-demandes", label: "Demandes FDFP", icon: FileText, href: "/admin/contenu/fdfp" },
 ];
 
 export default function AdminShell({
@@ -49,15 +52,13 @@ export default function AdminShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   async function handleLogout() {
-    // Effacer le cookie de session admin local
-    await fetch('/api/admin/auth/logout', { method: 'POST' })
-    // Déconnecter aussi la session Supabase si elle existe
+    await fetch("/api/admin/auth/logout", { method: "POST" });
     try {
-      const supabase = createClient()
-      await supabase.auth.signOut()
+      const supabase = createClient();
+      await supabase.auth.signOut();
     } catch { /* ignoré si Supabase non configuré */ }
-    router.push('/admin/login')
-    router.refresh()
+    router.push("/admin/login");
+    router.refresh();
   }
 
   function isActive(href: string) {
@@ -65,50 +66,46 @@ export default function AdminShell({
     return pathname?.startsWith(href);
   }
 
+  function currentLabel() {
+    return ADMIN_NAV.find((n) => isActive(n.href))?.label ?? "Administration";
+  }
+
+  const NavLinks = ({ onClick }: { onClick?: () => void }) => (
+    <>
+      {ADMIN_NAV.map((item) => (
+        <Link
+          key={item.id}
+          href={item.href}
+          onClick={onClick}
+          className={`flex items-center gap-3 rounded px-3 py-2 text-sm font-medium transition-colors ${
+            isActive(item.href)
+              ? "bg-white/15 text-white"
+              : "text-white/70 hover:bg-white/10 hover:text-white"
+          }`}
+        >
+          <item.icon size={16} />
+          {item.label}
+        </Link>
+      ))}
+    </>
+  );
+
   return (
     <div className="flex min-h-[calc(100vh-5rem)]">
       {/* Sidebar desktop */}
-      <aside className="hidden w-60 shrink-0 border-r border-gray-200 bg-gesthorest-primary lg:block">
+      <aside className="hidden w-60 shrink-0 border-r border-gray-200 bg-gesthorest-primary lg:flex lg:flex-col">
         <div className="flex h-14 items-center gap-2 border-b border-white/10 px-4">
           <Link href="/" className="flex items-center gap-1 text-sm text-white/70 hover:text-white">
             <ChevronLeft size={16} />
             Site
           </Link>
           <span className="mx-2 text-white/30">|</span>
-          <span className="text-sm font-semibold text-white">Administration</span>
+          <span className="text-sm font-semibold text-white">Admin</span>
         </div>
-        <nav className="flex flex-col gap-0.5 overflow-y-auto p-3">
-          {ADMIN_NAV.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`flex items-center gap-3 rounded px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive(item.href)
-                  ? "bg-white/15 text-white"
-                  : "text-white/70 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <item.icon size={18} />
-              {item.label}
-            </Link>
-          ))}
-          <p className="mt-3 px-3 text-xs font-semibold uppercase tracking-wider text-white/30">Éditeur contenu</p>
-          {CONTENU_NAV.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`flex items-center gap-3 rounded px-3 py-2 text-sm font-medium transition-colors ${
-                isActive(item.href)
-                  ? "bg-white/15 text-white"
-                  : "text-white/60 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <item.icon size={16} />
-              {item.label}
-            </Link>
-          ))}
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3">
+          <NavLinks />
         </nav>
-        <div className="mt-auto border-t border-white/10 p-3">
+        <div className="border-t border-white/10 p-3">
           <p className="mb-2 truncate px-3 text-xs text-white/50">{displayName}</p>
           <button
             type="button"
@@ -134,7 +131,7 @@ export default function AdminShell({
               <Menu size={22} />
             </button>
             <h1 className="font-heading text-lg font-semibold text-gesthorest-primary">
-              {ADMIN_NAV.find((n) => isActive(n.href))?.label || "Administration"}
+              {currentLabel()}
             </h1>
           </div>
           <span className="hidden text-sm text-gesthorest-text-light sm:inline">{displayName}</span>
@@ -166,22 +163,8 @@ export default function AdminShell({
               <X size={22} />
             </button>
           </div>
-          <nav className="flex flex-col gap-0.5 p-3">
-            {ADMIN_NAV.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 rounded px-3 py-3 text-sm font-medium ${
-                  isActive(item.href)
-                    ? "bg-white/15 text-white"
-                    : "text-white/70 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <item.icon size={18} />
-                {item.label}
-              </Link>
-            ))}
+          <nav className="flex flex-col gap-0.5 overflow-y-auto p-3">
+            <NavLinks onClick={() => setMobileOpen(false)} />
           </nav>
           <div className="border-t border-white/10 p-3">
             <button
