@@ -1,61 +1,62 @@
-import type { Metadata } from "next";
-import { Poppins, Inter } from "next/font/google";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import ToastProvider from "@/components/ui/ToastProvider";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Poppins, Inter } from 'next/font/google'
+import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
+import ToastProvider from '@/components/ui/ToastProvider'
+import WhatsAppFloat from '@/components/ui/WhatsAppFloat'
+import PwaInstallBanner from '@/components/PwaInstallBanner'
+import './globals.css'
 
 const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-poppins",
-});
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  variable: '--font-poppins',
+})
 
 const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-inter",
-});
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-inter',
+})
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://gesthorest.vercel.app")
-  .replace(/^﻿/, '')
-  .trim();
+const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://gesthorest.vercel.app'
+const siteUrl = rawSiteUrl.replace(/^﻿/, '').trim()
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: "Gesthorest International — Former aujourd'hui, réussir demain",
-    template: "%s | Gesthorest International",
+    template: '%s | Gesthorest International',
   },
   description:
-    "Gesthorest International, cabinet de formation professionnelle et de recrutement à Abidjan et Paris. Agréé FDFP · Certifié ISO 9001:2015.",
-  manifest: "/manifest.json",
-  themeColor: "#1B2A4A",
+    'Gesthorest International, cabinet de formation professionnelle et de recrutement à Abidjan et Paris. Agréé FDFP · Certifié ISO 9001:2015.',
+  manifest: '/manifest.json',
+  themeColor: '#1B2A4A',
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "Gesthorest",
+    statusBarStyle: 'default',
+    title: 'Gesthorest',
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/icons/icon-192x192.png",
+    icon: '/favicon.ico',
+    apple: '/icons/icon-192x192.png',
   },
   openGraph: {
     title: "Gesthorest International — Former aujourd'hui, réussir demain",
     description:
-      "Cabinet de formation professionnelle et de recrutement à Abidjan et Paris. Agréé FDFP · Certifié ISO 9001:2015.",
+      'Cabinet de formation professionnelle et de recrutement à Abidjan et Paris. Agréé FDFP · Certifié ISO 9001:2015.',
     url: siteUrl,
-    siteName: "Gesthorest International",
-    images: [{ url: "/logo-gesthorest.png" }],
-    locale: "fr_FR",
-    type: "website",
+    siteName: 'Gesthorest International',
+    images: [{ url: '/logo-gesthorest.png' }],
+    locale: 'fr_FR',
+    type: 'website',
   },
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="fr">
@@ -68,8 +69,10 @@ export default function RootLayout({
           <Navbar />
           <main className="pt-20">{children}</main>
           <Footer />
+          <WhatsAppFloat />
+          <PwaInstallBanner />
         </ToastProvider>
       </body>
     </html>
-  );
+  )
 }

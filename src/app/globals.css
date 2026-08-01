@@ -67,6 +67,18 @@ h1, h2, h3, h4, h5, h6 {
     animation: accordion-up 200ms ease-out;
   }
 
+  .animate-whatsapp-pulse {
+    animation: whatsapp-pulse 3s ease-in-out infinite;
+  }
+}
+
+@keyframes whatsapp-pulse {
+  0%, 100% { box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); }
+  50% { box-shadow: 0 4px 25px rgba(37, 211, 102, 0.75); transform: scale(1.05); }
+}
+
+@layer utilities {
+
   .container-gesthorest {
     @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
   }

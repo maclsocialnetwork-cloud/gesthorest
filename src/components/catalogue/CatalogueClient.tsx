@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { DOMAIN_LABELS, type Formation, type Domaine } from "@/lib/data/formations-seed";
 import FormationCard from "./FormationCard";
+import SearchBar from "@/components/ui/SearchBar";
 
 type DureeBucket = "toutes" | "1-2" | "3-5" | "1semaine+";
 type FormatFilter = "Tous" | "Présentiel" | "Distanciel" | "Blended";
@@ -42,6 +43,11 @@ export default function CatalogueClient({
 
   return (
     <div>
+      {/* Barre de recherche pleine largeur */}
+      <div className="container-gesthorest pt-8 pb-2">
+        <SearchBar variant="catalogue" className="max-w-2xl mx-auto" />
+      </div>
+
       <div className="sticky top-20 z-30 -mx-4 border-b border-gray-100 bg-white/95 px-4 py-4 backdrop-blur sm:mx-0 sm:rounded">
         <div className="container-gesthorest flex flex-wrap items-end gap-4 !px-0">
           <div>
