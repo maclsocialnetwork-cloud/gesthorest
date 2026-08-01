@@ -15,7 +15,10 @@ export default async function AdminLayout({
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/admin/login");
+    // Le middleware gère la redirection vers /admin/login pour toutes les routes protégées.
+    // Ici on rend les enfants directement pour éviter une boucle infinie
+    // quand le layout enveloppe /admin/login lui-même.
+    return <>{children}</>
   }
 
   const { data: apprenant } = await supabase
