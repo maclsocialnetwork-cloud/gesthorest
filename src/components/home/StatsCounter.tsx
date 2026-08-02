@@ -1,22 +1,18 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ShieldCheck } from 'lucide-react'
+import { ICON_MAP } from '@/lib/icon-map'
 import AnimatedSection from '@/components/ui/AnimatedSection'
 
-type Stat =
-  | { type: 'counter'; value: number; suffix: string; label: string }
-  | { type: 'badge'; icon: typeof ShieldCheck; label: string; sub: string }
-  | { type: 'text'; prefix: string; label: string; sub: string }
-
-const STATS: Stat[] = [
-  { type: 'badge', icon: ShieldCheck, label: 'Agréé FDFP', sub: 'Fonds pour le Développement de la Formation Professionnelle' },
-  { type: 'counter', value: 50, suffix: '+', label: 'formations au catalogue' },
-  { type: 'counter', value: 200, suffix: '+', label: 'entreprises accompagnées' },
-  { type: 'counter', value: 3500, suffix: '+', label: 'apprenants formés' },
-  { type: 'counter', value: 94, suffix: '%', label: 'de satisfaction client' },
-  { type: 'text', prefix: 'Partout', label: 'en Côte d\'Ivoire', sub: 'et en Europe' },
-]
+export type StatRow = {
+  type: string
+  valeur: number | null
+  suffixe: string | null
+  libelle: string
+  sous_texte: string | null
+  prefixe: string | null
+  icone: string | null
+}
 
 function useCountUp(target: number, active: boolean, duration = 1500) {
   const [value, setValue] = useState(0)
@@ -36,19 +32,19 @@ function useCountUp(target: number, active: boolean, duration = 1500) {
   return value
 }
 
-function CounterItem({ stat, active }: { stat: Extract<Stat, { type: 'counter' }>; active: boolean }) {
-  const count = useCountUp(stat.value, active)
+function CounterItem({ stat, active }: { stat: StatRow; active: boolean }) {
+  const count = useCountUp(stat.valeur ?? 0, active)
   return (
     <div className="text-center">
       <p className="font-heading text-4xl font-bold text-gesthorest-accent sm:text-5xl">
-        {count.toLocaleString('fr-FR')}{stat.suffix}
+        {count.toLocaleString('fr-FR')}{stat.suffixe}
       </p>
-      <p className="mt-2 text-sm font-medium text-gesthorest-primary">{stat.label}</p>
+      <p className="mt-2 text-sm font-medium text-gesthorest-primary">{stat.libelle}</p>
     </div>
   )
 }
 
-export default function StatsCounter() {
+export default function StatsCounter({ stats }: { stats: StatRow[] }) {
   const [active, setActive] = useState(false)
   const sectionRef = useRef<HTMLDivElement>(null)
 
@@ -63,6 +59,8 @@ export default function StatsCounter() {
     return () => observer.disconnect()
   }, [])
 
+  if (!stats.length) return null
+
   return (
     <section ref={sectionRef} className="section-padding bg-white">
       <div className="container-gesthorest">
@@ -76,25 +74,26 @@ export default function StatsCounter() {
         </AnimatedSection>
 
         <div className="mt-12 grid grid-cols-2 gap-8 lg:grid-cols-3 xl:grid-cols-6">
-          {STATS.map((stat, i) => (
+          {stats.map((stat, i) => (
             <AnimatedSection key={i} delay={i * 0.08}>
-              {stat.type === 'counter' && (
-                <CounterItem stat={stat} active={active} />
-              )}
-              {stat.type === 'badge' && (
-                <div className="text-center">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gesthorest-accent/10">
-                    <ShieldCheck size={28} className="text-gesthorest-accent" />
+              {stat.type === 'counter' && <CounterItem stat={stat} active={active} />}
+              {stat.type === 'badge' && (() => {
+                const Icon = ICON_MAP[stat.icone ?? ''] ?? ICON_MAP.ShieldCheck
+                return (
+                  <div className="text-center">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gesthorest-accent/10">
+                      <Icon size={28} className="text-gesthorest-accent" />
+                    </div>
+                    <p className="mt-3 font-heading text-lg font-bold text-gesthorest-primary">{stat.libelle}</p>
+                    <p className="mt-1 text-xs text-gesthorest-text-light leading-tight">{stat.sous_texte}</p>
                   </div>
-                  <p className="mt-3 font-heading text-lg font-bold text-gesthorest-primary">{stat.label}</p>
-                  <p className="mt-1 text-xs text-gesthorest-text-light leading-tight">{stat.sub}</p>
-                </div>
-              )}
+                )
+              })()}
               {stat.type === 'text' && (
                 <div className="text-center">
-                  <p className="font-heading text-2xl font-bold text-gesthorest-accent sm:text-3xl">{stat.prefix}</p>
-                  <p className="mt-1 font-heading text-base font-semibold text-gesthorest-primary">{stat.label}</p>
-                  <p className="text-sm text-gesthorest-text-light">{stat.sub}</p>
+                  <p className="font-heading text-2xl font-bold text-gesthorest-accent sm:text-3xl">{stat.prefixe}</p>
+                  <p className="mt-1 font-heading text-base font-semibold text-gesthorest-primary">{stat.libelle}</p>
+                  <p className="text-sm text-gesthorest-text-light">{stat.sous_texte}</p>
                 </div>
               )}
             </AnimatedSection>

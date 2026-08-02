@@ -6,35 +6,12 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { X, ZoomIn } from 'lucide-react'
 import AnimatedSection from '@/components/ui/AnimatedSection'
 
-const PHOTOS = [
-  {
-    src: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=800&q=80',
-    alt: 'Salle de formation professionnelle',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80',
-    alt: 'Équipe en réunion de travail',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80',
-    alt: 'Formatrice en présentation',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80',
-    alt: 'Atelier de team building',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80',
-    alt: 'Présentation business professionnelle',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=800&q=80',
-    alt: 'Conférence et formation en entreprise',
-  },
-]
+export type GalerieRow = { photo_url: string; titre: string }
 
-export default function GallerySection() {
-  const [selected, setSelected] = useState<(typeof PHOTOS)[0] | null>(null)
+export default function GallerySection({ photos }: { photos: GalerieRow[] }) {
+  const [selected, setSelected] = useState<GalerieRow | null>(null)
+
+  if (!photos.length) return null
 
   return (
     <section className="section-padding bg-white">
@@ -51,18 +28,17 @@ export default function GallerySection() {
           </p>
         </AnimatedSection>
 
-        {/* Grille masonry */}
         <div className="mt-12 columns-2 gap-4 lg:columns-3">
-          {PHOTOS.map((photo, i) => (
-            <AnimatedSection key={photo.src} delay={i * 0.08} className="mb-4 break-inside-avoid">
+          {photos.map((photo, i) => (
+            <AnimatedSection key={photo.photo_url} delay={i * 0.08} className="mb-4 break-inside-avoid">
               <button
                 onClick={() => setSelected(photo)}
                 className="group relative block w-full overflow-hidden rounded-xl shadow-sm"
               >
                 <div className="relative aspect-[4/3] w-full overflow-hidden">
                   <Image
-                    src={photo.src}
-                    alt={photo.alt}
+                    src={photo.photo_url}
+                    alt={photo.titre}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     sizes="(min-width: 1024px) 33vw, 50vw"
@@ -77,19 +53,18 @@ export default function GallerySection() {
         </div>
       </div>
 
-      {/* Lightbox */}
       <Dialog.Root open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm" />
           <Dialog.Content className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <Dialog.Title className="sr-only">
-              {selected?.alt ?? 'Photo galerie'}
+              {selected?.titre ?? 'Photo galerie'}
             </Dialog.Title>
             {selected && (
               <div className="relative max-h-[90vh] max-w-4xl w-full overflow-hidden rounded-xl">
                 <Image
-                  src={selected.src}
-                  alt={selected.alt}
+                  src={selected.photo_url}
+                  alt={selected.titre}
                   width={1200}
                   height={800}
                   className="h-auto w-full object-contain"

@@ -2,11 +2,17 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import Footer, { type FooterData } from "@/components/layout/Footer";
 import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 
-export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
+export default function LayoutWrapper({
+  children,
+  footerData,
+}: {
+  children: React.ReactNode;
+  footerData: FooterData;
+}) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
 
@@ -18,7 +24,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     <>
       <Navbar />
       <main className="pt-20">{children}</main>
-      <Footer />
+      <Footer data={footerData} />
       <WhatsAppFloat />
       <PwaInstallBanner />
     </>

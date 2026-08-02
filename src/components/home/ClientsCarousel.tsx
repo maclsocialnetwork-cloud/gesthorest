@@ -1,14 +1,6 @@
 import AnimatedSection from '@/components/ui/AnimatedSection'
 
-const LOGOS_ROW1 = [
-  'Ecobank CI', 'Orange CI', 'MTN CI', 'Nestlé CI', 'TotalEnergies CI',
-  'Société Générale CI', 'SODECI', 'CIE', 'Bolloré Africa', 'SIB',
-]
-
-const LOGOS_ROW2 = [
-  'CFAO Motors', 'SIFCA', "Air Côte d'Ivoire", 'Moov Africa', 'BIAO-CI',
-  'NSIA Banque', 'Coris Bank CI', 'CANAL+ Afrique', 'BNETD', 'Afrique Télécom',
-]
+export type ClientRow = { nom: string; rangee: number }
 
 function LogoCard({ name }: { name: string }) {
   return (
@@ -33,7 +25,12 @@ function MarqueeRow({ logos, reverse = false }: { logos: string[]; reverse?: boo
   )
 }
 
-export default function ClientsCarousel() {
+export default function ClientsCarousel({ clients }: { clients: ClientRow[] }) {
+  const row1 = clients.filter(c => c.rangee === 1).map(c => c.nom)
+  const row2 = clients.filter(c => c.rangee === 2).map(c => c.nom)
+
+  if (!row1.length && !row2.length) return null
+
   return (
     <section className="section-padding bg-[#F8F9FC]">
       <div className="container-gesthorest">
@@ -52,8 +49,8 @@ export default function ClientsCarousel() {
       </div>
 
       <div className="mt-12 space-y-4">
-        <MarqueeRow logos={LOGOS_ROW1} />
-        <MarqueeRow logos={LOGOS_ROW2} reverse />
+        {row1.length > 0 && <MarqueeRow logos={row1} />}
+        {row2.length > 0 && <MarqueeRow logos={row2} reverse />}
       </div>
     </section>
   )

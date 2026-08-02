@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { Mail, Phone, MapPin, ShieldCheck, Award } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
+import { ICON_MAP } from "@/lib/icon-map";
+
+export type FooterData = {
+  certifications: { nom: string; icone: string | null }[];
+  domaines: { libelle: string; slug: string }[];
+  coordonnees: Record<string, string>;
+};
 
 function FacebookIcon({ size = 18 }: { size?: number }) {
   return (
@@ -27,26 +34,33 @@ function InstagramIcon({ size = 18 }: { size?: number }) {
   );
 }
 
-const FORMATIONS_LINKS = [
-  { href: "/catalogue?domaine=management", label: "Management" },
-  { href: "/catalogue?domaine=ressources-humaines", label: "Ressources Humaines" },
-  { href: "/catalogue?domaine=finance-comptabilite", label: "Finance & Comptabilité" },
-  { href: "/catalogue", label: "Voir tout le catalogue" },
-  { href: "/fdfp", label: "Financement FDFP" },
-  { href: "/telechargements", label: "Téléchargements" },
-  { href: "/faq", label: "FAQ" },
-];
+export default function Footer({ data }: { data: FooterData }) {
+  const { certifications, domaines, coordonnees } = data;
 
-export default function Footer() {
+  const formationLinks = domaines.slice(0, 4).map((d) => ({
+    href: `/catalogue?domaine=${d.slug}`,
+    label: d.libelle,
+  }));
+  formationLinks.push(
+    { href: "/catalogue", label: "Voir tout le catalogue" },
+    { href: "/fdfp", label: "Financement FDFP" },
+    { href: "/telechargements", label: "Téléchargements" },
+    { href: "/faq", label: "FAQ" }
+  );
+
+  const email = coordonnees.email_contact || "contact@gesthorest.com";
+  const telCi = coordonnees.telephone_ci || "+225 07 47 12 33 21";
+  const telFr = coordonnees.telephone_fr || "+33 6 71 97 11 59";
+  const adrCi = coordonnees.adresse_ci || "Abidjan — Côte d'Ivoire";
+  const adrFr = coordonnees.adresse_fr || "Paris — France";
+
   return (
     <footer className="bg-gesthorest-primary text-white">
       <div className="container-gesthorest grid grid-cols-1 gap-10 py-16 md:grid-cols-2 lg:grid-cols-4">
         <div>
           <div className="flex items-baseline gap-2 font-heading">
             <span className="text-2xl font-bold text-white">Gesthorest</span>
-            <span className="text-sm font-semibold text-gesthorest-accent">
-              International
-            </span>
+            <span className="text-sm font-semibold text-gesthorest-accent">International</span>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-white/70">
             Accompagner les entreprises, institutions et professionnels vers
@@ -60,12 +74,9 @@ export default function Footer() {
             Formations
           </h3>
           <ul className="mt-4 space-y-3">
-            {FORMATIONS_LINKS.map((link) => (
+            {formationLinks.map((link) => (
               <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="text-sm text-white/70 transition-colors hover:text-gesthorest-accent"
-                >
+                <Link href={link.href} className="text-sm text-white/70 transition-colors hover:text-gesthorest-accent">
                   {link.label}
                 </Link>
               </li>
@@ -80,32 +91,26 @@ export default function Footer() {
           <ul className="mt-4 space-y-3 text-sm text-white/70">
             <li className="flex items-start gap-2">
               <MapPin size={18} className="mt-0.5 shrink-0 text-gesthorest-accent" />
-              <span>Abidjan — Côte d&apos;Ivoire</span>
+              <span>{adrCi}</span>
             </li>
             <li className="flex items-start gap-2">
               <MapPin size={18} className="mt-0.5 shrink-0 text-gesthorest-accent" />
-              <span>Paris — France</span>
+              <span>{adrFr}</span>
             </li>
             <li className="flex items-center gap-2">
               <Mail size={18} className="shrink-0 text-gesthorest-accent" />
-              <a href="mailto:contact@gesthorest.com" className="hover:text-gesthorest-accent">
-                contact@gesthorest.com
-              </a>
+              <a href={`mailto:${email}`} className="hover:text-gesthorest-accent">{email}</a>
             </li>
             <li className="flex items-center gap-2">
               <Phone size={18} className="shrink-0 text-gesthorest-accent" />
-              <a href="tel:+2250747123321" className="hover:text-gesthorest-accent">
-                +225 07 47 12 33 21
-              </a>
+              <a href={`tel:${telCi.replace(/\s/g, '')}`} className="hover:text-gesthorest-accent">{telCi}</a>
             </li>
             <li className="flex items-center gap-2">
               <Phone size={18} className="shrink-0 text-gesthorest-accent" />
-              <a href="tel:+33671971159" className="hover:text-gesthorest-accent">
-                +33 6 71 97 11 59
-              </a>
+              <a href={`tel:${telFr.replace(/\s/g, '')}`} className="hover:text-gesthorest-accent">{telFr}</a>
             </li>
             <li>
-              <Link href="/admin/login" className="text-sm text-transparent hover:text-gray-300 transition-colors duration-300">
+              <Link href="/admin/login" className="text-xs select-none cursor-pointer text-white hover:text-gray-400 transition-colors duration-500">
                 Administration
               </Link>
             </li>
@@ -117,14 +122,15 @@ export default function Footer() {
             Certifications
           </h3>
           <div className="mt-4 flex flex-col gap-3">
-            <div className="flex items-center gap-2 rounded border border-white/15 bg-white/5 px-3 py-2">
-              <ShieldCheck size={20} className="shrink-0 text-gesthorest-accent" />
-              <span className="text-sm text-white/80">Agréé FDFP</span>
-            </div>
-            <div className="flex items-center gap-2 rounded border border-white/15 bg-white/5 px-3 py-2">
-              <Award size={20} className="shrink-0 text-gesthorest-accent" />
-              <span className="text-sm text-white/80">Certifié ISO 9001:2015</span>
-            </div>
+            {certifications.map((cert) => {
+              const Icon = ICON_MAP[cert.icone ?? ''] ?? ICON_MAP.ShieldCheck;
+              return (
+                <div key={cert.nom} className="flex items-center gap-2 rounded border border-white/15 bg-white/5 px-3 py-2">
+                  <Icon size={20} className="shrink-0 text-gesthorest-accent" />
+                  <span className="text-sm text-white/80">{cert.nom}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -132,28 +138,16 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="container-gesthorest flex flex-col items-center justify-between gap-4 py-6 sm:flex-row">
           <p className="text-xs text-white/60">
-            © {new Date().getFullYear()} Gesthorest International. Tous droits réservés.
+            &copy; {new Date().getFullYear()} Gesthorest International. Tous droits réservés.
           </p>
           <div className="flex items-center gap-4">
-            <a
-              href="#"
-              aria-label="Facebook"
-              className="text-white/60 transition-colors hover:text-gesthorest-accent"
-            >
+            <a href="#" aria-label="Facebook" className="text-white/60 transition-colors hover:text-gesthorest-accent">
               <FacebookIcon size={18} />
             </a>
-            <a
-              href="#"
-              aria-label="LinkedIn"
-              className="text-white/60 transition-colors hover:text-gesthorest-accent"
-            >
+            <a href="#" aria-label="LinkedIn" className="text-white/60 transition-colors hover:text-gesthorest-accent">
               <LinkedinIcon size={18} />
             </a>
-            <a
-              href="#"
-              aria-label="Instagram"
-              className="text-white/60 transition-colors hover:text-gesthorest-accent"
-            >
+            <a href="#" aria-label="Instagram" className="text-white/60 transition-colors hover:text-gesthorest-accent">
               <InstagramIcon size={18} />
             </a>
           </div>

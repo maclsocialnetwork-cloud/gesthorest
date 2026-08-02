@@ -1,13 +1,10 @@
-import { ShieldCheck, Award, Clock, Globe2 } from "lucide-react";
+import { ICON_MAP } from "@/lib/icon-map";
 
-const BADGES = [
-  { icon: ShieldCheck, label: "Agréé FDFP" },
-  { icon: Award, label: "Certifié ISO 9001:2015" },
-  { icon: Clock, label: "12 ans d'expertise" },
-  { icon: Globe2, label: "Présence Afrique-Europe" },
-];
+export type CertificationRow = { nom: string; icone: string | null }
 
-export default function TrustBanner() {
+export default function TrustBanner({ certifications }: { certifications: CertificationRow[] }) {
+  if (!certifications.length) return null
+
   return (
     <section className="bg-gesthorest-primary py-14">
       <div className="container-gesthorest">
@@ -16,17 +13,15 @@ export default function TrustBanner() {
         </h2>
 
         <div className="mt-8 grid grid-cols-2 gap-6 lg:grid-cols-4">
-          {BADGES.map((badge) => {
-            const Icon = badge.icon;
+          {certifications.map((cert) => {
+            const Icon = ICON_MAP[cert.icone ?? ''] ?? ICON_MAP.ShieldCheck;
             return (
               <div
-                key={badge.label}
+                key={cert.nom}
                 className="flex flex-col items-center gap-3 rounded border border-white/10 bg-white/5 px-4 py-6 text-center"
               >
                 <Icon size={28} className="text-gesthorest-accent" />
-                <span className="text-sm font-medium text-white">
-                  {badge.label}
-                </span>
+                <span className="text-sm font-medium text-white">{cert.nom}</span>
               </div>
             );
           })}
