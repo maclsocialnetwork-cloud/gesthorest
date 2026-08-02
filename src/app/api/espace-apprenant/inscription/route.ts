@@ -27,10 +27,13 @@ export async function POST(request: Request) {
 
   const { nom, prenom, email, telephone, entreprise, password } = parsed.data;
 
-  const authAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  console.log("[inscription] SUPABASE_URL présente:", !!supabaseUrl, "longueur:", supabaseUrl?.length);
+  console.log("[inscription] SERVICE_ROLE_KEY présente:", !!serviceKey, "longueur:", serviceKey?.length);
+
+  const authAdmin = createClient(supabaseUrl!, serviceKey!);
 
   const { data: authData, error: authError } = await authAdmin.auth.admin.createUser({
     email,
@@ -40,7 +43,13 @@ export async function POST(request: Request) {
   });
 
   if (authError) {
-    return NextResponse.json({ error: authError.message }, { status: 400 });
+    console.error("[inscription] authError complet:", JSON.stringify(authError, null, 2));
+    return NextResponse.json({
+      error: authError.message,
+      code: authError.code ?? null,
+      status: authError.status ?? null,
+      details: JSON.stringify(authError),
+    }, { status: 400 });
   }
 
   const db = createAdminClient();
@@ -55,7 +64,11 @@ export async function POST(request: Request) {
   });
 
   if (profileError) {
-    console.error("Erreur création profil apprenant:", profileError);
+    console.error("[inscription] profileError complet:", JSON.stringify(profileError, null, 2));
+    return NextResponse.json({
+      error: "Utilisateur créé mais erreur profil: " + profileError.message,
+      details: JSON.stringify(profileError),
+    }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });
