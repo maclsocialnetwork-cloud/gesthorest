@@ -111,7 +111,7 @@ export default function Footer({ data }: { data: FooterData }) {
             </li>
             <li>
               <Link href="/admin/login" className="text-xs select-none cursor-pointer text-white hover:text-gray-400 transition-colors duration-500">
-                Administration
+                ·
               </Link>
             </li>
           </ul>

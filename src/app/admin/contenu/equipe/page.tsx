@@ -1,10 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import EquipeEditor from "@/components/admin/contenu/EquipeEditor";
 
 export const metadata = { title: "Éditeur — Équipe" };
 
 export default async function AdminEquipePage() {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data: equipe } = await supabase
     .from("equipe")
