@@ -1,10 +1,7 @@
 import type { Metadata } from 'next'
 import { Poppins, Inter } from 'next/font/google'
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
 import ToastProvider from '@/components/ui/ToastProvider'
-import WhatsAppFloat from '@/components/ui/WhatsAppFloat'
-import PwaInstallBanner from '@/components/PwaInstallBanner'
+import LayoutWrapper from '@/components/layout/LayoutWrapper'
 import './globals.css'
 
 const poppins = Poppins({
@@ -66,11 +63,7 @@ export default function RootLayout({
       </head>
       <body className={`${poppins.variable} ${inter.variable} font-body antialiased`}>
         <ToastProvider>
-          <Navbar />
-          <main className="pt-20">{children}</main>
-          <Footer />
-          <WhatsAppFloat />
-          <PwaInstallBanner />
+          <LayoutWrapper>{children}</LayoutWrapper>
         </ToastProvider>
       </body>
     </html>

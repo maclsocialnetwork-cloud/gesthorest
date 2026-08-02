@@ -79,7 +79,7 @@ export default function AdminShell({
           onClick={onClick}
           className={`flex items-center gap-3 rounded px-3 py-2 text-sm font-medium transition-colors ${
             isActive(item.href)
-              ? "bg-white/15 text-white"
+              ? "bg-[#F5821F] text-white"
               : "text-white/70 hover:bg-white/10 hover:text-white"
           }`}
         >
@@ -91,7 +91,7 @@ export default function AdminShell({
   );
 
   return (
-    <div className="flex min-h-[calc(100vh-5rem)]">
+    <div className="flex min-h-screen">
       {/* Sidebar desktop */}
       <aside className="hidden w-60 shrink-0 border-r border-gray-200 bg-gesthorest-primary lg:flex lg:flex-col">
         <div className="flex h-14 items-center gap-2 border-b border-white/10 px-4">
