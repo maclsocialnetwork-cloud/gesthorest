@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPlus, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { inscriptionSchema, type InscriptionInput } from "@/lib/validation/auth";
-import { createClient } from "@/lib/supabase/client";
 import { INPUT_CLASS } from "@/lib/ui-classes";
 import { useToast } from "@/components/ui/ToastProvider";
 
@@ -28,46 +27,27 @@ export default function InscriptionPage() {
   async function onSubmit(data: InscriptionInput) {
     setLoading(true);
     try {
-      const supabase = createClient();
-
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/espace-apprenant/connexion`,
-          data: {
-            nom: data.nom,
-            prenom: data.prenom,
-            telephone: data.telephone,
-            entreprise: data.entreprise || "",
-          },
-        },
+      const res = await fetch("/api/espace-apprenant/inscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nom: data.nom,
+          prenom: data.prenom,
+          email: data.email,
+          telephone: data.telephone,
+          entreprise: data.entreprise || "",
+          password: data.password,
+        }),
       });
 
-      if (authError) {
-        showToast(authError.message, "error");
+      const json = await res.json();
+
+      if (!res.ok) {
+        showToast(json.error || "Une erreur est survenue", "error");
         return;
       }
 
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from("apprenants")
-          .insert({
-            user_id: authData.user.id,
-            nom: data.nom,
-            prenom: data.prenom,
-            email: data.email,
-            telephone: data.telephone,
-            entreprise: data.entreprise || null,
-            role: "apprenant",
-          });
-
-        if (profileError) {
-          console.error("Erreur création profil apprenant:", profileError);
-        }
-      }
-
-      showToast("Compte créé avec succès ! Vérifiez votre email pour confirmer votre inscription.");
+      showToast("Compte créé avec succès ! Vous pouvez maintenant vous connecter.");
       router.push("/espace-apprenant/connexion");
     } catch {
       showToast("Une erreur est survenue", "error");
