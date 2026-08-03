@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Shield, User, GraduationCap } from "lucide-react";
+import { CheckCircle, XCircle, Ban, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 
 type Utilisateur = {
@@ -13,67 +13,106 @@ type Utilisateur = {
   telephone: string | null;
   entreprise: string | null;
   role: string;
+  statut: string;
   created_at: string;
 };
 
 type Props = { utilisateurs: Utilisateur[] };
 
-const INPUT = "w-full rounded border border-gray-200 px-3 py-2 text-sm text-gesthorest-text focus:border-gesthorest-accent focus:outline-none";
+type StatutFilter = "tous" | "en_attente" | "actif" | "bloque";
 
-const ROLE_BADGE: Record<string, { label: string; cls: string; icon: typeof Shield }> = {
-  admin: { label: "Admin", cls: "bg-red-100 text-red-700", icon: Shield },
-  formateur: { label: "Formateur", cls: "bg-blue-100 text-blue-700", icon: GraduationCap },
-  apprenant: { label: "Apprenant", cls: "bg-gray-100 text-gray-600", icon: User },
+const STATUT_BADGE: Record<string, { label: string; cls: string }> = {
+  en_attente: { label: "En attente", cls: "bg-yellow-100 text-yellow-700" },
+  actif: { label: "Actif", cls: "bg-green-100 text-green-700" },
+  bloque: { label: "Bloqué", cls: "bg-red-100 text-red-700" },
 };
 
 export default function UtilisateursAdmin({ utilisateurs }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
-  const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ nom: "", prenom: "", email: "", telephone: "", entreprise: "", role: "apprenant" });
-  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState<StatutFilter>("tous");
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  async function handleRoleChange(id: string, role: string) {
-    const res = await fetch("/api/admin/utilisateurs", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, role }),
-    });
-    if (res.ok) {
-      showToast("Rôle mis à jour");
-      router.refresh();
-    } else {
-      showToast("Erreur", "error");
-    }
-  }
+  const filtered =
+    filter === "tous"
+      ? utilisateurs
+      : utilisateurs.filter((u) => u.statut === filter);
 
-  async function handleCreate() {
-    setLoading(true);
+  const counts = {
+    tous: utilisateurs.length,
+    en_attente: utilisateurs.filter((u) => u.statut === "en_attente").length,
+    actif: utilisateurs.filter((u) => u.statut === "actif").length,
+    bloque: utilisateurs.filter((u) => u.statut === "bloque").length,
+  };
+
+  async function changeStatut(id: string, statut: string) {
+    setLoadingId(id);
     try {
-      const res = await fetch("/api/admin/utilisateurs", {
-        method: "POST",
+      const res = await fetch("/api/admin/apprenants", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ id, statut }),
       });
       if (!res.ok) throw new Error();
-      showToast("Utilisateur créé");
-      setShowModal(false);
-      setForm({ nom: "", prenom: "", email: "", telephone: "", entreprise: "", role: "apprenant" });
+      const labels: Record<string, string> = {
+        actif: "Compte validé",
+        bloque: "Compte bloqué",
+        en_attente: "Remis en attente",
+      };
+      showToast(labels[statut] || "Mis à jour");
       router.refresh();
     } catch {
-      showToast("Erreur lors de la création", "error");
+      showToast("Erreur", "error");
     } finally {
-      setLoading(false);
+      setLoadingId(null);
     }
   }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Supprimer définitivement ce compte ?")) return;
+    setLoadingId(id);
+    try {
+      const res = await fetch(`/api/admin/apprenants?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      showToast("Compte supprimé");
+      router.refresh();
+    } catch {
+      showToast("Erreur", "error");
+    } finally {
+      setLoadingId(null);
+    }
+  }
+
+  const TABS: { key: StatutFilter; label: string }[] = [
+    { key: "tous", label: `Tous (${counts.tous})` },
+    { key: "en_attente", label: `En attente (${counts.en_attente})` },
+    { key: "actif", label: `Actifs (${counts.actif})` },
+    { key: "bloque", label: `Bloqués (${counts.bloque})` },
+  ];
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-gesthorest-text-light">{utilisateurs.length} utilisateur(s)</p>
-        <button type="button" onClick={() => setShowModal(true)} className="btn-primary flex items-center gap-2 text-sm">
-          <Plus size={16} /> Créer manuellement
-        </button>
+      {counts.en_attente > 0 && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+          <span className="font-semibold">{counts.en_attente}</span> compte(s) en attente de validation.
+        </div>
+      )}
+
+      <div className="mb-4 flex gap-2 overflow-x-auto">
+        {TABS.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => setFilter(tab.key)}
+            className={`rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
+              filter === tab.key
+                ? "bg-gesthorest-primary text-white"
+                : "bg-white text-gesthorest-text shadow-sm hover:bg-gray-50"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
@@ -84,102 +123,94 @@ export default function UtilisateursAdmin({ utilisateurs }: Props) {
               <th className="px-4 py-3 font-medium text-gesthorest-text">Email</th>
               <th className="hidden px-4 py-3 font-medium text-gesthorest-text sm:table-cell">Téléphone</th>
               <th className="hidden px-4 py-3 font-medium text-gesthorest-text md:table-cell">Entreprise</th>
-              <th className="px-4 py-3 font-medium text-gesthorest-text">Rôle</th>
+              <th className="px-4 py-3 font-medium text-gesthorest-text">Statut</th>
               <th className="px-4 py-3 font-medium text-gesthorest-text">Inscrit le</th>
+              <th className="px-4 py-3 font-medium text-gesthorest-text">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {utilisateurs.map((u) => {
-              const badge = ROLE_BADGE[u.role] || ROLE_BADGE.apprenant;
+            {filtered.map((u) => {
+              const badge = STATUT_BADGE[u.statut] ?? { label: u.statut, cls: "bg-gray-100 text-gray-600" };
+              const isLoading = loadingId === u.id;
               return (
                 <tr key={u.id} className="hover:bg-gesthorest-light/50">
                   <td className="px-4 py-3 font-medium text-gesthorest-primary">
                     {u.prenom} {u.nom}
                   </td>
                   <td className="px-4 py-3 text-gesthorest-text-light">{u.email}</td>
-                  <td className="hidden px-4 py-3 text-gesthorest-text-light sm:table-cell">{u.telephone || "—"}</td>
-                  <td className="hidden px-4 py-3 text-gesthorest-text-light md:table-cell">{u.entreprise || "—"}</td>
+                  <td className="hidden px-4 py-3 text-gesthorest-text-light sm:table-cell">
+                    {u.telephone || "—"}
+                  </td>
+                  <td className="hidden px-4 py-3 text-gesthorest-text-light md:table-cell">
+                    {u.entreprise || "—"}
+                  </td>
                   <td className="px-4 py-3">
-                    <select
-                      value={u.role}
-                      onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls} cursor-pointer border-none outline-none`}
-                    >
-                      <option value="apprenant">Apprenant</option>
-                      <option value="formateur">Formateur</option>
-                      <option value="admin">Admin</option>
-                    </select>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}`}>
+                      {badge.label}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-gesthorest-text-light">
                     {new Date(u.created_at).toLocaleDateString("fr-FR")}
                   </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1">
+                      {u.statut === "en_attente" && (
+                        <button
+                          type="button"
+                          title="Valider"
+                          disabled={isLoading}
+                          onClick={() => changeStatut(u.id, "actif")}
+                          className="rounded p-1 text-green-600 hover:bg-green-50 disabled:opacity-40"
+                        >
+                          <CheckCircle size={16} />
+                        </button>
+                      )}
+                      {u.statut === "actif" && (
+                        <button
+                          type="button"
+                          title="Bloquer"
+                          disabled={isLoading}
+                          onClick={() => changeStatut(u.id, "bloque")}
+                          className="rounded p-1 text-orange-500 hover:bg-orange-50 disabled:opacity-40"
+                        >
+                          <Ban size={16} />
+                        </button>
+                      )}
+                      {u.statut === "bloque" && (
+                        <button
+                          type="button"
+                          title="Débloquer"
+                          disabled={isLoading}
+                          onClick={() => changeStatut(u.id, "actif")}
+                          className="rounded p-1 text-green-600 hover:bg-green-50 disabled:opacity-40"
+                        >
+                          <XCircle size={16} />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        title="Supprimer"
+                        disabled={isLoading}
+                        onClick={() => handleDelete(u.id)}
+                        className="rounded p-1 text-red-400 hover:bg-red-50 disabled:opacity-40"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               );
             })}
-            {utilisateurs.length === 0 && (
+            {filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gesthorest-text-light">
-                  Aucun utilisateur.
+                <td colSpan={7} className="px-4 py-8 text-center text-gesthorest-text-light">
+                  Aucun apprenant dans cette catégorie.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-
-      {/* Modal création manuelle */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-4 font-heading text-lg font-bold text-gesthorest-primary">
-              Créer un apprenant
-            </h3>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-sm font-medium">Nom *</label>
-                  <input className={INPUT} value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium">Prénom *</label>
-                  <input className={INPUT} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Email *</label>
-                <input className={INPUT} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Téléphone</label>
-                <input className={INPUT} value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Entreprise</label>
-                <input className={INPUT} value={form.entreprise} onChange={(e) => setForm({ ...form, entreprise: e.target.value })} />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Rôle</label>
-                <select className={INPUT} value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
-                  <option value="apprenant">Apprenant</option>
-                  <option value="formateur">Formateur</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button type="button" onClick={() => setShowModal(false)} className="btn-secondary text-sm">Annuler</button>
-              <button
-                type="button"
-                onClick={handleCreate}
-                disabled={loading || !form.nom || !form.prenom || !form.email}
-                className="btn-primary text-sm disabled:opacity-60"
-              >
-                {loading ? "Création…" : "Créer"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

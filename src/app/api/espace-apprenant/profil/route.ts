@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getApprenantId } from "@/lib/apprenant-session";
+import { hashPassword } from "@/lib/password";
 import { profilSchema } from "@/lib/validation/profil";
 
 export async function PUT(request: Request) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
+  const apprenantId = getApprenantId();
+  if (!apprenantId) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
@@ -20,6 +20,7 @@ export async function PUT(request: Request) {
     );
   }
 
+  const supabase = createAdminClient();
   const { error } = await supabase
     .from("apprenants")
     .update({
@@ -28,7 +29,7 @@ export async function PUT(request: Request) {
       telephone: parsed.data.telephone,
       entreprise: parsed.data.entreprise || null,
     })
-    .eq("user_id", user.id);
+    .eq("id", apprenantId);
 
   if (error) {
     return NextResponse.json({ error: "Erreur de mise à jour" }, { status: 500 });
@@ -38,10 +39,8 @@ export async function PUT(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
+  const apprenantId = getApprenantId();
+  if (!apprenantId) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
@@ -54,9 +53,13 @@ export async function PATCH(request: Request) {
     );
   }
 
-  const { error } = await supabase.auth.updateUser({
-    password: body.password,
-  });
+  const password_hash = await hashPassword(body.password);
+  const supabase = createAdminClient();
+
+  const { error } = await supabase
+    .from("apprenants")
+    .update({ password_hash })
+    .eq("id", apprenantId);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

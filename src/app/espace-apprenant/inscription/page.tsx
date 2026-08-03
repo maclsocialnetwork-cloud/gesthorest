@@ -47,7 +47,7 @@ export default function InscriptionPage() {
         return;
       }
 
-      showToast("Compte créé avec succès ! Vous pouvez maintenant vous connecter.");
+      showToast("Demande enregistrée ! Notre équipe validera votre accès dans les meilleurs délais.");
       router.push("/espace-apprenant/connexion");
     } catch {
       showToast("Une erreur est survenue", "error");

@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getApprenantId } from "@/lib/apprenant-session";
 import { Award } from "lucide-react";
 import AttestationDownloadButton from "@/components/espace-apprenant/AttestationDownloadButton";
 
@@ -13,43 +14,40 @@ type InscriptionAttestation = {
 };
 
 export default async function MesAttestationsPage() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/espace-apprenant/connexion");
+  const apprenantId = getApprenantId();
+  if (!apprenantId) redirect("/espace-apprenant/connexion");
+
+  const supabase = createAdminClient();
 
   const { data: apprenant } = await supabase
     .from("apprenants")
     .select("id, nom, prenom")
-    .eq("user_id", user.id)
+    .eq("id", apprenantId)
+    .eq("statut", "actif")
     .single();
 
-  let completedFormations: InscriptionAttestation[] = [];
+  if (!apprenant) redirect("/espace-apprenant/connexion");
 
-  if (apprenant) {
-    const { data } = await supabase
-      .from("inscriptions")
-      .select(`
-        id,
-        sessions (
-          date_debut,
-          date_fin,
-          formations (
-            titre,
-            duree
-          )
+  const { data } = await supabase
+    .from("inscriptions")
+    .select(`
+      id,
+      sessions (
+        date_debut,
+        date_fin,
+        formations (
+          titre,
+          duree
         )
-      `)
-      .eq("apprenant_id", apprenant.id)
-      .eq("statut", "confirme");
+      )
+    `)
+    .eq("apprenant_id", apprenant.id)
+    .eq("statut", "confirme");
 
-    if (data) {
-      const now = new Date();
-      completedFormations = (data as unknown as InscriptionAttestation[]).filter((ins) => {
-        const dateFin = ins.sessions?.date_fin;
-        return dateFin && new Date(dateFin) <= now;
-      });
-    }
-  }
+  const now = new Date();
+  const completedFormations = ((data ?? []) as unknown as InscriptionAttestation[]).filter(
+    (ins) => ins.sessions?.date_fin && new Date(ins.sessions.date_fin) <= now
+  );
 
   return (
     <div>
@@ -70,7 +68,10 @@ export default async function MesAttestationsPage() {
             const session = ins.sessions;
             const formation = session?.formations;
             return (
-              <div key={ins.id} className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-white p-5 shadow-sm">
+              <div
+                key={ins.id}
+                className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-white p-5 shadow-sm"
+              >
                 <div>
                   <h3 className="font-heading text-base font-semibold text-gesthorest-primary">
                     {formation?.titre || "Formation"}

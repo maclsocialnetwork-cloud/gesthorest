@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getApprenantId } from "@/lib/apprenant-session";
 import { Star } from "lucide-react";
 import EvaluationForm from "@/components/espace-apprenant/EvaluationForm";
 
@@ -19,50 +20,52 @@ type EvaluationRow = {
 };
 
 export default async function MesEvaluationsPage() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/espace-apprenant/connexion");
+  const apprenantId = getApprenantId();
+  if (!apprenantId) redirect("/espace-apprenant/connexion");
+
+  const supabase = createAdminClient();
 
   const { data: apprenant } = await supabase
     .from("apprenants")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("id", apprenantId)
+    .eq("statut", "actif")
     .single();
+
+  if (!apprenant) redirect("/espace-apprenant/connexion");
 
   let formationsToEvaluate: InscriptionToEvaluate[] = [];
   let existingEvaluations: EvaluationRow[] = [];
 
-  if (apprenant) {
-    const now = new Date().toISOString();
+  const now = new Date().toISOString();
 
-    const { data: inscriptions } = await supabase
-      .from("inscriptions")
-      .select(`
-        id,
-        sessions (
-          date_fin,
-          formations (
-            titre,
-            domaine
-          )
+  const { data: inscriptions } = await supabase
+    .from("inscriptions")
+    .select(`
+      id,
+      sessions (
+        date_fin,
+        formations (
+          titre,
+          domaine
         )
-      `)
-      .eq("apprenant_id", apprenant.id)
-      .eq("statut", "confirme");
+      )
+    `)
+    .eq("apprenant_id", apprenant.id)
+    .eq("statut", "confirme");
 
-    const { data: evals } = await supabase
-      .from("evaluations")
-      .select("inscription_id, note, commentaire, created_at");
+  const { data: evals } = await supabase
+    .from("evaluations")
+    .select("inscription_id, note, commentaire, created_at");
 
-    existingEvaluations = (evals ?? []) as unknown as EvaluationRow[];
-    const evaluatedIds = new Set(existingEvaluations.map((e) => e.inscription_id));
+  existingEvaluations = (evals ?? []) as unknown as EvaluationRow[];
+  const evaluatedIds = new Set(existingEvaluations.map((e) => e.inscription_id));
 
-    if (inscriptions) {
-      formationsToEvaluate = (inscriptions as unknown as InscriptionToEvaluate[]).filter((ins) => {
-        const dateFin = ins.sessions?.date_fin;
-        return dateFin && new Date(dateFin) <= new Date(now) && !evaluatedIds.has(ins.id);
-      });
-    }
+  if (inscriptions) {
+    formationsToEvaluate = (inscriptions as unknown as InscriptionToEvaluate[]).filter((ins) => {
+      const dateFin = ins.sessions?.date_fin;
+      return dateFin && new Date(dateFin) <= new Date(now) && !evaluatedIds.has(ins.id);
+    });
   }
 
   return (
@@ -102,7 +105,11 @@ export default async function MesEvaluationsPage() {
                     <Star
                       key={star}
                       size={18}
-                      className={star <= ev.note ? "fill-gesthorest-accent text-gesthorest-accent" : "text-gray-300"}
+                      className={
+                        star <= ev.note
+                          ? "fill-gesthorest-accent text-gesthorest-accent"
+                          : "text-gray-300"
+                      }
                     />
                   ))}
                   <span className="ml-2 text-sm text-gesthorest-text-light">

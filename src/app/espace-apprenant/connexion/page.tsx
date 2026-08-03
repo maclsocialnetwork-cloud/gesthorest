@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
-import { createClient } from "@/lib/supabase/client";
 import { INPUT_CLASS } from "@/lib/ui-classes";
 import { useToast } from "@/components/ui/ToastProvider";
 
@@ -28,20 +27,19 @@ export default function ConnexionPage() {
   async function onSubmit(data: LoginInput) {
     setLoading(true);
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
+      const res = await fetch("/api/espace-apprenant/connexion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email, password: data.password }),
       });
-      if (error) {
-        showToast(
-          error.message === "Invalid login credentials"
-            ? "Email ou mot de passe incorrect"
-            : error.message,
-          "error"
-        );
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        showToast(json.error || "Une erreur est survenue", "error");
         return;
       }
+
       showToast("Connexion réussie !");
       router.push("/espace-apprenant/dashboard");
       router.refresh();

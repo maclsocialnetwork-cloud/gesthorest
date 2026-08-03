@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getApprenantId } from "@/lib/apprenant-session";
 import { Clock, Phone, Mail, MapPin } from "lucide-react";
 
 type ReservationRow = {
@@ -18,44 +19,44 @@ type ReservationRow = {
 };
 
 export default async function MesReservationsPage() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/espace-apprenant/connexion");
+  const apprenantId = getApprenantId();
+  if (!apprenantId) redirect("/espace-apprenant/connexion");
+
+  const supabase = createAdminClient();
 
   const { data: apprenant } = await supabase
     .from("apprenants")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("id", apprenantId)
+    .eq("statut", "actif")
     .single();
 
-  let reservations: ReservationRow[] = [];
+  if (!apprenant) redirect("/espace-apprenant/connexion");
 
-  if (apprenant) {
-    const { data } = await supabase
-      .from("inscriptions")
-      .select(`
-        id,
-        statut,
-        type_paiement,
-        montant,
-        devise,
-        numero_bon,
-        created_at,
-        sessions (
-          date_debut,
-          lieu,
-          formations (
-            titre,
-            domaine
-          )
+  const { data } = await supabase
+    .from("inscriptions")
+    .select(`
+      id,
+      statut,
+      type_paiement,
+      montant,
+      devise,
+      numero_bon,
+      created_at,
+      sessions (
+        date_debut,
+        lieu,
+        formations (
+          titre,
+          domaine
         )
-      `)
-      .eq("apprenant_id", apprenant.id)
-      .eq("statut", "en_attente")
-      .order("created_at", { ascending: false });
+      )
+    `)
+    .eq("apprenant_id", apprenant.id)
+    .eq("statut", "en_attente")
+    .order("created_at", { ascending: false });
 
-    reservations = (data ?? []) as unknown as ReservationRow[];
-  }
+  const reservations = (data ?? []) as unknown as ReservationRow[];
 
   return (
     <div>
@@ -66,9 +67,7 @@ export default async function MesReservationsPage() {
       {reservations.length === 0 ? (
         <div className="rounded-lg bg-white p-8 text-center shadow-sm">
           <Clock size={40} className="mx-auto mb-3 text-gesthorest-text-light" />
-          <p className="text-gesthorest-text-light">
-            Aucune réservation en attente.
-          </p>
+          <p className="text-gesthorest-text-light">Aucune réservation en attente.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -76,14 +75,20 @@ export default async function MesReservationsPage() {
             const session = res.sessions;
             const formation = session?.formations;
             return (
-              <div key={res.id} className="rounded-lg border-l-4 border-yellow-400 bg-white p-5 shadow-sm">
+              <div
+                key={res.id}
+                className="rounded-lg border-l-4 border-yellow-400 bg-white p-5 shadow-sm"
+              >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <h3 className="font-heading text-base font-semibold text-gesthorest-primary">
                       {formation?.titre || "Formation"}
                     </h3>
                     <p className="mt-1 text-sm text-gesthorest-text-light">
-                      N° Bon : <span className="font-mono font-medium text-gesthorest-text">{res.numero_bon}</span>
+                      N° Bon :{" "}
+                      <span className="font-mono font-medium text-gesthorest-text">
+                        {res.numero_bon}
+                      </span>
                     </p>
                   </div>
                   <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">

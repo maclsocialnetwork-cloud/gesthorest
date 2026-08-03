@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getApprenantId } from "@/lib/apprenant-session";
 import DashboardShell from "@/components/espace-apprenant/DashboardShell";
 
 export const metadata = {
@@ -11,22 +12,21 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const apprenantId = getApprenantId();
+  if (!apprenantId) redirect("/espace-apprenant/connexion");
 
-  if (!user) {
+  const supabase = createAdminClient();
+  const { data: apprenant } = await supabase
+    .from("apprenants")
+    .select("nom, prenom, statut")
+    .eq("id", apprenantId)
+    .single();
+
+  if (!apprenant || apprenant.statut !== "actif") {
     redirect("/espace-apprenant/connexion");
   }
 
-  const { data: apprenant } = await supabase
-    .from("apprenants")
-    .select("nom, prenom, email")
-    .eq("user_id", user.id)
-    .single();
-
-  const displayName = apprenant
-    ? `${apprenant.prenom} ${apprenant.nom}`
-    : user.email ?? "Apprenant";
+  const displayName = `${apprenant.prenom} ${apprenant.nom}`;
 
   return (
     <DashboardShell displayName={displayName}>

@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getApprenantId } from "@/lib/apprenant-session";
 import { BookOpen, Calendar, MapPin, User as UserIcon } from "lucide-react";
 
 type InscriptionRow = {
@@ -20,52 +21,52 @@ type InscriptionRow = {
 };
 
 export default async function MesFormationsPage() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/espace-apprenant/connexion");
+  const apprenantId = getApprenantId();
+  if (!apprenantId) redirect("/espace-apprenant/connexion");
+
+  const supabase = createAdminClient();
 
   const { data: apprenant } = await supabase
     .from("apprenants")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("id", apprenantId)
+    .eq("statut", "actif")
     .single();
 
-  let inscriptions: InscriptionRow[] = [];
+  if (!apprenant) redirect("/espace-apprenant/connexion");
 
-  if (apprenant) {
-    const { data } = await supabase
-      .from("inscriptions")
-      .select(`
+  const { data } = await supabase
+    .from("inscriptions")
+    .select(`
+      id,
+      statut,
+      montant,
+      devise,
+      created_at,
+      confirmed_at,
+      sessions (
         id,
-        statut,
-        montant,
-        devise,
-        created_at,
-        confirmed_at,
-        sessions (
-          id,
-          date_debut,
-          date_fin,
-          lieu,
-          formations (
-            titre,
-            domaine,
-            format,
-            duree
-          ),
-          formateurs (
-            nom,
-            prenom,
-            titre
-          )
+        date_debut,
+        date_fin,
+        lieu,
+        formations (
+          titre,
+          domaine,
+          format,
+          duree
+        ),
+        formateurs (
+          nom,
+          prenom,
+          titre
         )
-      `)
-      .eq("apprenant_id", apprenant.id)
-      .eq("statut", "confirme")
-      .order("created_at", { ascending: false });
+      )
+    `)
+    .eq("apprenant_id", apprenant.id)
+    .eq("statut", "confirme")
+    .order("created_at", { ascending: false });
 
-    inscriptions = (data ?? []) as unknown as InscriptionRow[];
-  }
+  const inscriptions = (data ?? []) as unknown as InscriptionRow[];
 
   const statusLabel: Record<string, string> = {
     confirme: "Confirmée",

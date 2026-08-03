@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getApprenantId } from "@/lib/apprenant-session";
 import { generateAttestationPdf } from "@/lib/pdf/attestation";
 
 export async function GET(request: Request) {
@@ -10,17 +11,18 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "inscriptionId requis" }, { status: 400 });
   }
 
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
+  const apprenantId = getApprenantId();
+  if (!apprenantId) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
+
+  const supabase = createAdminClient();
 
   const { data: apprenant } = await supabase
     .from("apprenants")
     .select("id, nom, prenom")
-    .eq("user_id", user.id)
+    .eq("id", apprenantId)
+    .eq("statut", "actif")
     .single();
 
   if (!apprenant) {

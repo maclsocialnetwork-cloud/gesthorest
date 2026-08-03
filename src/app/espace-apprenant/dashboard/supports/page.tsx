@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getApprenantId } from "@/lib/apprenant-session";
 import { FileDown, FolderOpen } from "lucide-react";
 
 type SupportFormation = {
@@ -20,64 +21,60 @@ type InscriptionWithFormation = {
   };
 };
 
-type StorageFile = {
-  name: string;
-};
+type StorageFile = { name: string };
 
 export default async function MesSupportsPage() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/espace-apprenant/connexion");
+  const apprenantId = getApprenantId();
+  if (!apprenantId) redirect("/espace-apprenant/connexion");
+
+  const supabase = createAdminClient();
 
   const { data: apprenant } = await supabase
     .from("apprenants")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("id", apprenantId)
+    .eq("statut", "actif")
     .single();
+
+  if (!apprenant) redirect("/espace-apprenant/connexion");
 
   const formations: SupportFormation[] = [];
 
-  if (apprenant) {
-    const { data: inscriptions } = await supabase
-      .from("inscriptions")
-      .select(`
-        sessions (
-          formation_id,
-          formations (
-            id,
-            titre,
-            domaine,
-            slug
-          )
+  const { data: inscriptions } = await supabase
+    .from("inscriptions")
+    .select(`
+      sessions (
+        formation_id,
+        formations (
+          id,
+          titre,
+          domaine,
+          slug
         )
-      `)
-      .eq("apprenant_id", apprenant.id)
-      .eq("statut", "confirme");
+      )
+    `)
+    .eq("apprenant_id", apprenant.id)
+    .eq("statut", "confirme");
 
-    if (inscriptions) {
-      const seen = new Set<string>();
-      for (const ins of inscriptions as unknown as InscriptionWithFormation[]) {
-        const formation = ins.sessions?.formations;
-        if (!formation || seen.has(formation.id)) continue;
-        seen.add(formation.id);
+  if (inscriptions) {
+    const seen = new Set<string>();
+    for (const ins of inscriptions as unknown as InscriptionWithFormation[]) {
+      const formation = ins.sessions?.formations;
+      if (!formation || seen.has(formation.id)) continue;
+      seen.add(formation.id);
 
-        const { data: fileList } = await supabase.storage
+      const { data: fileList } = await supabase.storage
+        .from("supports")
+        .list(`formations/${formation.slug}`, { limit: 50 });
+
+      const files = (fileList || []).map((f: StorageFile) => ({
+        name: f.name,
+        url: supabase.storage
           .from("supports")
-          .list(`formations/${formation.slug}`, { limit: 50 });
+          .getPublicUrl(`formations/${formation.slug}/${f.name}`).data.publicUrl,
+      }));
 
-        const files = (fileList || []).map((f: StorageFile) => ({
-          name: f.name,
-          url: supabase.storage
-            .from("supports")
-            .getPublicUrl(`formations/${formation.slug}/${f.name}`).data.publicUrl,
-        }));
-
-        formations.push({
-          titre: formation.titre,
-          domaine: formation.domaine,
-          files,
-        });
-      }
+      formations.push({ titre: formation.titre, domaine: formation.domaine, files });
     }
   }
 
