@@ -155,15 +155,26 @@ export default function UtilisateursAdmin({ utilisateurs }: Props) {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
                       {u.statut === "en_attente" && (
-                        <button
-                          type="button"
-                          title="Valider"
-                          disabled={isLoading}
-                          onClick={() => changeStatut(u.id, "actif")}
-                          className="rounded p-1 text-green-600 hover:bg-green-50 disabled:opacity-40"
-                        >
-                          <CheckCircle size={16} />
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            title="Valider l'accès"
+                            disabled={isLoading}
+                            onClick={() => changeStatut(u.id, "actif")}
+                            className="rounded p-1 text-green-600 hover:bg-green-50 disabled:opacity-40"
+                          >
+                            <CheckCircle size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            title="Rejeter la demande"
+                            disabled={isLoading}
+                            onClick={() => changeStatut(u.id, "bloque")}
+                            className="rounded p-1 text-red-500 hover:bg-red-50 disabled:opacity-40"
+                          >
+                            <XCircle size={16} />
+                          </button>
+                        </>
                       )}
                       {u.statut === "actif" && (
                         <button
@@ -184,12 +195,12 @@ export default function UtilisateursAdmin({ utilisateurs }: Props) {
                           onClick={() => changeStatut(u.id, "actif")}
                           className="rounded p-1 text-green-600 hover:bg-green-50 disabled:opacity-40"
                         >
-                          <XCircle size={16} />
+                          <CheckCircle size={16} />
                         </button>
                       )}
                       <button
                         type="button"
-                        title="Supprimer"
+                        title="Supprimer définitivement"
                         disabled={isLoading}
                         onClick={() => handleDelete(u.id)}
                         className="rounded p-1 text-red-400 hover:bg-red-50 disabled:opacity-40"
