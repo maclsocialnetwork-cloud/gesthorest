@@ -18,14 +18,6 @@ export default async function AdminAProposPage() {
     .select("cle, valeur")
     .in("cle", TEXTE_KEYS);
 
-  console.log("[a-propos] SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(0, 40));
-  console.log("[a-propos] equipe.data:", JSON.stringify(equipeResult.data));
-  console.log("[a-propos] equipe.error:", JSON.stringify(equipeResult.error));
-  console.log("[a-propos] equipe.count:", equipeResult.count);
-  console.log("[a-propos] equipe.status:", equipeResult.status);
-  console.log("[a-propos] settings.data:", JSON.stringify(settingsResult.data));
-  console.log("[a-propos] settings.error:", JSON.stringify(settingsResult.error));
-
   const settingsMap: Record<string, string> = {};
   for (const s of settingsResult.data ?? []) settingsMap[s.cle] = s.valeur;
 
