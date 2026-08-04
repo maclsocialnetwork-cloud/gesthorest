@@ -12,12 +12,10 @@ import TrustBanner, { type CertificationRow } from '@/components/home/TrustBanne
 import FinalCta from '@/components/home/FinalCta'
 
 const FB_STATS: StatRow[] = [
-  { type: 'badge', valeur: null, suffixe: null, libelle: 'Agréé FDFP', sous_texte: 'Fonds pour le Développement de la Formation Professionnelle', prefixe: null, icone: 'ShieldCheck' },
   { type: 'counter', valeur: 50, suffixe: '+', libelle: 'formations au catalogue', sous_texte: null, prefixe: null, icone: null },
   { type: 'counter', valeur: 200, suffixe: '+', libelle: 'entreprises accompagnées', sous_texte: null, prefixe: null, icone: null },
   { type: 'counter', valeur: 3500, suffixe: '+', libelle: 'apprenants formés', sous_texte: null, prefixe: null, icone: null },
   { type: 'counter', valeur: 94, suffixe: '%', libelle: 'de satisfaction client', sous_texte: null, prefixe: null, icone: null },
-  { type: 'text', valeur: null, suffixe: null, libelle: "en Côte d'Ivoire", sous_texte: 'et en Europe', prefixe: 'Partout', icone: null },
 ]
 const FB_CLIENTS: ClientRow[] = [
   { nom: 'Ecobank CI', rangee: 1 }, { nom: 'Orange CI', rangee: 1 }, { nom: 'MTN CI', rangee: 1 },
@@ -28,12 +26,12 @@ const FB_CLIENTS: ClientRow[] = [
   { nom: 'Coris Bank CI', rangee: 2 }, { nom: 'CANAL+ Afrique', rangee: 2 }, { nom: 'BNETD', rangee: 2 }, { nom: 'Afrique Télécom', rangee: 2 },
 ]
 const FB_GALERIE: GalerieRow[] = [
-  { photo_url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80', titre: 'Formation professionnelle en Afrique' },
-  { photo_url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80', titre: 'Salle de réunion professionnelle' },
-  { photo_url: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80', titre: 'Équipe africaine en formation' },
-  { photo_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80', titre: 'Formatrice africaine en présentation' },
-  { photo_url: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80', titre: 'Salle de formation moderne' },
-  { photo_url: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=800&q=80', titre: 'Atelier de formation groupe' },
+  { photo_url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80', titre: 'Formation professionnelle en Afrique' },
+  { photo_url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80', titre: 'Salle de réunion professionnelle' },
+  { photo_url: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80', titre: 'Équipe africaine en formation' },
+  { photo_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80', titre: 'Formatrice africaine en présentation' },
+  { photo_url: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80', titre: 'Salle de formation moderne' },
+  { photo_url: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80', titre: 'Atelier de formation groupe' },
 ]
 const FB_TEMOIGNAGES: TemoignageRow[] = [
   { nom: 'Aïcha Kouamé', poste: 'Directrice RH', entreprise: 'Groupe Ivoire Distribution', photo_url: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=200&h=200&q=80', texte: "Une formation très pratique qui a permis à nos managers d'améliorer leur performance opérationnelle en 3 mois. Le suivi post-formation est vraiment appréciable.", note: 5 },
@@ -63,8 +61,10 @@ const FB_DOMAINES: DomaineRow[] = [
   { libelle: 'Communication', slug: 'communication' }, { libelle: 'Sécurité au Travail', slug: 'securite-travail' },
 ]
 const FB_CERTIFICATIONS: CertificationRow[] = [
-  { nom: 'Agréé FDFP', icone: 'ShieldCheck' }, { nom: 'Certifié ISO 9001:2015', icone: 'Award' },
-  { nom: "12 ans d'expertise", icone: 'Clock' }, { nom: 'Présence Afrique-Europe', icone: 'Globe2' },
+  { nom: 'Agréé FDFP', icone: null, logo_url: '/logo-fdfp.jpg' },
+  { nom: 'Certifié ISO 9001:2015', icone: null, logo_url: '/logo-iso-9001.jpg' },
+  { nom: "12 ans d'expertise", icone: 'Clock', logo_url: null },
+  { nom: 'Présence Afrique-Europe', icone: 'Globe2', logo_url: null },
 ]
 
 async function getHomeData() {
@@ -78,17 +78,28 @@ async function getHomeData() {
       supabase.from('avantages').select('icone, titre, description').eq('visible', true).order('ordre'),
       supabase.from('services').select('icone, titre, description, lien').eq('visible', true).order('ordre'),
       supabase.from('domaines').select('libelle, slug').eq('visible', true).order('ordre'),
-      supabase.from('certifications').select('nom, icone').eq('visible', true).order('ordre'),
+      supabase.from('certifications').select('nom, icone, logo_url').eq('visible', true).order('ordre'),
     ])
+    const rawStats = statsR.data?.length ? statsR.data : FB_STATS
+    const stats = rawStats.filter((s) => s.type === 'counter')
+
+    const rawCerts = certR.data?.length ? certR.data : FB_CERTIFICATIONS
+    const seen = new Set<string>()
+    const certifications = rawCerts.filter((c) => {
+      if (seen.has(c.nom)) return false
+      seen.add(c.nom)
+      return true
+    })
+
     return {
-      stats: statsR.data?.length ? statsR.data : FB_STATS,
+      stats,
       clients: clientsR.data?.length ? clientsR.data : FB_CLIENTS,
       galerie: galerieR.data?.length ? galerieR.data : FB_GALERIE,
       temoignages: temR.data?.length ? temR.data : FB_TEMOIGNAGES,
       avantages: avR.data?.length ? avR.data : FB_AVANTAGES,
       services: servR.data?.length ? servR.data : FB_SERVICES,
       domaines: domR.data?.length ? domR.data : FB_DOMAINES,
-      certifications: certR.data?.length ? certR.data : FB_CERTIFICATIONS,
+      certifications,
     }
   } catch {
     return {

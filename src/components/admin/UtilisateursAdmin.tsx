@@ -45,6 +45,24 @@ export default function UtilisateursAdmin({ utilisateurs }: Props) {
     bloque: utilisateurs.filter((u) => u.statut === "bloque").length,
   };
 
+  async function handleValider(id: string) {
+    setLoadingId(id);
+    try {
+      const res = await fetch("/api/admin/utilisateurs/valider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (!res.ok) throw new Error();
+      showToast("Compte validé");
+      router.refresh();
+    } catch {
+      showToast("Erreur lors de la validation", "error");
+    } finally {
+      setLoadingId(null);
+    }
+  }
+
   async function changeStatut(id: string, statut: string) {
     setLoadingId(id);
     try {
@@ -55,7 +73,6 @@ export default function UtilisateursAdmin({ utilisateurs }: Props) {
       });
       if (!res.ok) throw new Error();
       const labels: Record<string, string> = {
-        actif: "Compte validé",
         bloque: "Compte bloqué",
         en_attente: "Remis en attente",
       };
@@ -160,7 +177,7 @@ export default function UtilisateursAdmin({ utilisateurs }: Props) {
                             type="button"
                             title="Valider l'accès"
                             disabled={isLoading}
-                            onClick={() => changeStatut(u.id, "actif")}
+                            onClick={() => handleValider(u.id)}
                             className="rounded p-1 text-green-600 hover:bg-green-50 disabled:opacity-40"
                           >
                             <CheckCircle size={16} />

@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
-import { ICON_MAP } from "@/lib/icon-map";
 
 export type FooterData = {
-  certifications: { nom: string; icone: string | null }[];
   domaines: { libelle: string; slug: string }[];
   coordonnees: Record<string, string>;
 };
@@ -24,6 +22,14 @@ function LinkedinIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+function YoutubeIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.6 5 12 5 12 5s-4.6 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.3.9C6.8 19 12 19 12 19s4.6 0 7-.1c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8ZM10 15V9l5.2 3-5.2 3Z" />
+    </svg>
+  );
+}
+
 function InstagramIcon({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
@@ -34,8 +40,15 @@ function InstagramIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+const SOCIAL_LINKS = [
+  { href: "#", label: "Facebook", Icon: FacebookIcon },
+  { href: "#", label: "LinkedIn", Icon: LinkedinIcon },
+  { href: "#", label: "YouTube", Icon: YoutubeIcon },
+  { href: "#", label: "Instagram", Icon: InstagramIcon },
+];
+
 export default function Footer({ data }: { data: FooterData }) {
-  const { certifications, domaines, coordonnees } = data;
+  const { domaines, coordonnees } = data;
 
   const formationLinks = domaines.slice(0, 4).map((d) => ({
     href: `/catalogue?domaine=${d.slug}`,
@@ -119,19 +132,22 @@ export default function Footer({ data }: { data: FooterData }) {
 
         <div>
           <h3 className="font-heading text-sm font-semibold uppercase tracking-wide text-white">
-            Certifications
+            Suivez-nous
           </h3>
-          <div className="mt-4 flex flex-col gap-3">
-            {certifications.map((cert) => {
-              const Icon = ICON_MAP[cert.icone ?? ''] ?? ICON_MAP.ShieldCheck;
-              return (
-                <div key={cert.nom} className="flex items-center gap-2 rounded border border-white/15 bg-white/5 px-3 py-2">
-                  <Icon size={20} className="shrink-0 text-gesthorest-accent" />
-                  <span className="text-sm text-white/80">{cert.nom}</span>
-                </div>
-              );
-            })}
-          </div>
+          <ul className="mt-4 space-y-3">
+            {SOCIAL_LINKS.map(({ href, label, Icon }) => (
+              <li key={label}>
+                <a
+                  href={href}
+                  aria-label={label}
+                  className="flex items-center gap-3 text-sm text-white/70 transition-colors hover:text-gesthorest-accent"
+                >
+                  <Icon size={18} />
+                  <span>{label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
@@ -141,15 +157,11 @@ export default function Footer({ data }: { data: FooterData }) {
             &copy; {new Date().getFullYear()} Gesthorest International. Tous droits réservés.
           </p>
           <div className="flex items-center gap-4">
-            <a href="#" aria-label="Facebook" className="text-white/60 transition-colors hover:text-gesthorest-accent">
-              <FacebookIcon size={18} />
-            </a>
-            <a href="#" aria-label="LinkedIn" className="text-white/60 transition-colors hover:text-gesthorest-accent">
-              <LinkedinIcon size={18} />
-            </a>
-            <a href="#" aria-label="Instagram" className="text-white/60 transition-colors hover:text-gesthorest-accent">
-              <InstagramIcon size={18} />
-            </a>
+            {SOCIAL_LINKS.map(({ href, label, Icon }) => (
+              <a key={label} href={href} aria-label={label} className="text-white/60 transition-colors hover:text-gesthorest-accent">
+                <Icon size={18} />
+              </a>
+            ))}
           </div>
         </div>
       </div>

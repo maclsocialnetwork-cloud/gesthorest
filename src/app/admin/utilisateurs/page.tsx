@@ -18,10 +18,12 @@ type ApprenantRow = {
 export default async function AdminUtilisateursPage() {
   const supabase = createAdminClient();
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("apprenants")
     .select("id, nom, prenom, email, telephone, entreprise, role, statut, created_at")
     .order("created_at", { ascending: false });
+
+  if (error) console.error("[admin/utilisateurs] Supabase error:", error.message);
 
   const utilisateurs = (data ?? []) as ApprenantRow[];
 

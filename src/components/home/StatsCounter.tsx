@@ -73,7 +73,7 @@ export default function StatsCounter({ stats }: { stats: StatRow[] }) {
           </h2>
         </AnimatedSection>
 
-        <div className="mt-12 grid grid-cols-2 gap-8 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="mt-12 grid grid-cols-2 gap-8 sm:grid-cols-4">
           {stats.map((stat, i) => (
             <AnimatedSection key={i} delay={i * 0.08}>
               {stat.type === 'counter' && <CounterItem stat={stat} active={active} />}

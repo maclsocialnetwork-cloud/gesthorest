@@ -53,10 +53,6 @@ export const metadata: Metadata = {
 }
 
 const FALLBACK_FOOTER: FooterData = {
-  certifications: [
-    { nom: 'Agréé FDFP', icone: 'ShieldCheck' },
-    { nom: 'Certifié ISO 9001:2015', icone: 'Award' },
-  ],
   domaines: [
     { libelle: 'Management', slug: 'management' },
     { libelle: 'Ressources Humaines', slug: 'ressources-humaines' },
@@ -67,7 +63,7 @@ const FALLBACK_FOOTER: FooterData = {
     email_contact: 'contact@gesthorest.com',
     telephone_ci: '+225 07 47 12 33 21',
     telephone_fr: '+33 6 71 97 11 59',
-    adresse_ci: 'Abidjan — Côte d\'Ivoire',
+    adresse_ci: "Abidjan — Côte d'Ivoire",
     adresse_fr: 'Paris — France',
   },
 }
@@ -75,8 +71,7 @@ const FALLBACK_FOOTER: FooterData = {
 async function getFooterData(): Promise<FooterData> {
   try {
     const supabase = createClient()
-    const [certRes, domRes, paramRes] = await Promise.all([
-      supabase.from('certifications').select('nom, icone').eq('visible', true).order('ordre'),
+    const [domRes, paramRes] = await Promise.all([
       supabase.from('domaines').select('libelle, slug').eq('visible', true).order('ordre'),
       supabase.from('parametres_site').select('cle, valeur'),
     ])
@@ -87,7 +82,6 @@ async function getFooterData(): Promise<FooterData> {
     }
 
     return {
-      certifications: certRes.data?.length ? certRes.data : FALLBACK_FOOTER.certifications,
       domaines: domRes.data?.length ? domRes.data : FALLBACK_FOOTER.domaines,
       coordonnees: Object.keys(coordonnees).length ? coordonnees : FALLBACK_FOOTER.coordonnees,
     }
