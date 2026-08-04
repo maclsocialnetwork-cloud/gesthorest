@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Mail, Phone, MapPin, Clock, MessageCircle } from 'lucide-react'
-import Link from 'next/link'
 import PageHeader from '@/components/layout/PageHeader'
 import ContactForm from '@/components/forms/ContactForm'
 
@@ -55,18 +54,9 @@ export default function ContactPage() {
                 <Phone size={18} className="shrink-0 text-gesthorest-accent" />
                 +225 07 47 12 33 21
               </li>
-              <li className="flex items-center gap-2 justify-between">
-                <div className="flex items-center gap-2">
-                  <Phone size={18} className="shrink-0 text-gesthorest-accent" />
-                  +33 6 71 97 11 59
-                </div>
-                {/* Lien admin discret — EXACTEMENT comme SPD */}
-                <Link
-                  href="/admin/login"
-                  className="text-xs text-gray-300 hover:text-gray-400 transition-colors"
-                >
-                  Administration →
-                </Link>
+              <li className="flex items-center gap-2">
+                <Phone size={18} className="shrink-0 text-gesthorest-accent" />
+                +33 6 71 97 11 59
               </li>
             </ul>
           </div>

@@ -80,6 +80,12 @@ export default function Footer({ data }: { data: FooterData }) {
             l&apos;excellence grâce à des solutions sur mesure, pratiques et
             orientées performance.
           </p>
+          <Link
+            href="/admin/login"
+            className="mt-3 block text-xs select-none text-[#1B2A4A] hover:text-gray-500 transition-colors duration-500"
+          >
+            ·
+          </Link>
         </div>
 
         <div>
@@ -121,11 +127,6 @@ export default function Footer({ data }: { data: FooterData }) {
             <li className="flex items-center gap-2">
               <Phone size={18} className="shrink-0 text-gesthorest-accent" />
               <a href={`tel:${telFr.replace(/\s/g, '')}`} className="hover:text-gesthorest-accent">{telFr}</a>
-            </li>
-            <li>
-              <Link href="/admin/login" className="text-xs select-none cursor-pointer text-white hover:text-gray-400 transition-colors duration-500">
-                ·
-              </Link>
             </li>
           </ul>
         </div>
