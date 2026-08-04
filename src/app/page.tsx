@@ -8,7 +8,7 @@ import ClientsCarousel, { type ClientRow } from '@/components/home/ClientsCarous
 import GallerySection, { type GalerieRow } from '@/components/home/GallerySection'
 import Testimonials, { type TemoignageRow } from '@/components/home/Testimonials'
 import Newsletter from '@/components/ui/Newsletter'
-import TrustBanner, { type CertificationRow } from '@/components/home/TrustBanner'
+import TrustBanner from '@/components/home/TrustBanner'
 import FinalCta from '@/components/home/FinalCta'
 
 const FB_STATS: StatRow[] = [
@@ -60,17 +60,10 @@ const FB_DOMAINES: DomaineRow[] = [
   { libelle: 'Qualité & Process', slug: 'qualite-process' }, { libelle: 'Leadership', slug: 'leadership' },
   { libelle: 'Communication', slug: 'communication' }, { libelle: 'Sécurité au Travail', slug: 'securite-travail' },
 ]
-const FB_CERTIFICATIONS: CertificationRow[] = [
-  { nom: 'Agréé FDFP', icone: null, logo_url: '/logo-fdfp.jpg' },
-  { nom: 'Certifié ISO 9001:2015', icone: null, logo_url: '/logo-iso-9001.jpg' },
-  { nom: "12 ans d'expertise", icone: 'Clock', logo_url: null },
-  { nom: 'Présence Afrique-Europe', icone: 'Globe2', logo_url: null },
-]
-
 async function getHomeData() {
   try {
     const supabase = createClient()
-    const [statsR, clientsR, galerieR, temR, avR, servR, domR, certR] = await Promise.all([
+    const [statsR, clientsR, galerieR, temR, avR, servR, domR] = await Promise.all([
       supabase.from('chiffres_cles').select('type, valeur, suffixe, libelle, sous_texte, prefixe, icone').eq('visible', true).order('ordre'),
       supabase.from('clients').select('nom, rangee').eq('visible', true).order('ordre'),
       supabase.from('galerie').select('photo_url, titre').eq('visible', true).order('ordre'),
@@ -78,18 +71,9 @@ async function getHomeData() {
       supabase.from('avantages').select('icone, titre, description').eq('visible', true).order('ordre'),
       supabase.from('services').select('icone, titre, description, lien').eq('visible', true).order('ordre'),
       supabase.from('domaines').select('libelle, slug').eq('visible', true).order('ordre'),
-      supabase.from('certifications').select('nom, icone, logo_url').eq('visible', true).order('ordre'),
     ])
     const rawStats = statsR.data?.length ? statsR.data : FB_STATS
     const stats = rawStats.filter((s) => s.type === 'counter')
-
-    const rawCerts = certR.data?.length ? certR.data : FB_CERTIFICATIONS
-    const seen = new Set<string>()
-    const certifications = rawCerts.filter((c) => {
-      if (seen.has(c.nom)) return false
-      seen.add(c.nom)
-      return true
-    })
 
     return {
       stats,
@@ -99,12 +83,11 @@ async function getHomeData() {
       avantages: avR.data?.length ? avR.data : FB_AVANTAGES,
       services: servR.data?.length ? servR.data : FB_SERVICES,
       domaines: domR.data?.length ? domR.data : FB_DOMAINES,
-      certifications,
     }
   } catch {
     return {
       stats: FB_STATS, clients: FB_CLIENTS, galerie: FB_GALERIE, temoignages: FB_TEMOIGNAGES,
-      avantages: FB_AVANTAGES, services: FB_SERVICES, domaines: FB_DOMAINES, certifications: FB_CERTIFICATIONS,
+      avantages: FB_AVANTAGES, services: FB_SERVICES, domaines: FB_DOMAINES,
     }
   }
 }
@@ -123,7 +106,7 @@ export default async function Home() {
       <GallerySection photos={data.galerie} />
       <Testimonials testimonials={data.temoignages} />
       <Newsletter />
-      <TrustBanner certifications={data.certifications} />
+      <TrustBanner />
       <FinalCta />
     </>
   )

@@ -1,11 +1,32 @@
 import Image from "next/image";
-import { ICON_MAP } from "@/lib/icon-map";
+import { Clock, Globe2 } from "lucide-react";
 
-export type CertificationRow = { nom: string; icone: string | null; logo_url?: string | null }
+const TRUST_ITEMS = [
+  {
+    type: "image" as const,
+    src: "/logo-fdfp.jpg",
+    alt: "Agréé FDFP",
+    label: "Agréé FDFP",
+  },
+  {
+    type: "image" as const,
+    src: "/logo-iso-9001.jpg",
+    alt: "ISO 9001:2015",
+    label: "Certifié ISO 9001:2015",
+  },
+  {
+    type: "icon" as const,
+    Icon: Clock,
+    label: "12 ans d'expertise",
+  },
+  {
+    type: "icon" as const,
+    Icon: Globe2,
+    label: "Présence Afrique-Europe",
+  },
+];
 
-export default function TrustBanner({ certifications }: { certifications: CertificationRow[] }) {
-  if (!certifications.length) return null
-
+export default function TrustBanner() {
   return (
     <section className="bg-gesthorest-primary py-14">
       <div className="container-gesthorest">
@@ -14,24 +35,27 @@ export default function TrustBanner({ certifications }: { certifications: Certif
         </h2>
 
         <div className="mt-8 grid grid-cols-2 gap-6 lg:grid-cols-4">
-          {certifications.map((cert) => {
-            const Icon = ICON_MAP[cert.icone ?? ''] ?? ICON_MAP.ShieldCheck;
-            return (
-              <div
-                key={cert.nom}
-                className="flex flex-col items-center gap-3 rounded border border-white/10 bg-white/5 px-4 py-6 text-center"
-              >
-                {cert.logo_url ? (
-                  <div className="relative h-10 w-24">
-                    <Image src={cert.logo_url} alt={cert.nom} fill className="object-contain" sizes="96px" />
-                  </div>
-                ) : (
-                  <Icon size={28} className="text-gesthorest-accent" />
-                )}
-                <span className="text-sm font-medium text-white">{cert.nom}</span>
-              </div>
-            );
-          })}
+          {TRUST_ITEMS.map((item) => (
+            <div
+              key={item.label}
+              className="flex flex-col items-center gap-3 rounded border border-white/10 bg-white/5 px-4 py-6 text-center"
+            >
+              {item.type === "image" ? (
+                <div className="flex h-16 w-24 items-center justify-center rounded bg-white/90 px-2 py-1">
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    width={80}
+                    height={60}
+                    style={{ objectFit: "contain" }}
+                  />
+                </div>
+              ) : (
+                <item.Icon size={28} className="text-gesthorest-accent" />
+              )}
+              <span className="text-sm font-medium text-white">{item.label}</span>
+            </div>
+          ))}
         </div>
       </div>
     </section>

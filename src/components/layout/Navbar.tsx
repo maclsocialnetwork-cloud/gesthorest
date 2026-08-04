@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Menu, X, Search } from 'lucide-react'
@@ -43,7 +44,14 @@ export default function Navbar() {
     >
       <nav className="container-gesthorest flex h-20 items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-baseline gap-2 font-heading shrink-0">
+        <Link href="/" className="flex items-center gap-3 font-heading shrink-0">
+          <Image
+            src="/logo-gesthorest-onglet.png"
+            width={40}
+            height={40}
+            alt="Gesthorest"
+            className="h-10 w-10 object-contain"
+          />
           <span className={`text-2xl font-bold transition-colors ${scrolled ? 'text-white' : 'text-gesthorest-primary'}`}>
             Gesthorest
           </span>
